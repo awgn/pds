@@ -1,4 +1,5 @@
 #include "pds/loglog.hpp"
+#include "pds/hyperloglog.hpp"
 
 #include <iostream>
 
