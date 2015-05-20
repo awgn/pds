@@ -9,10 +9,10 @@
 #include <cmath>
 #include <cstring>
 
-#include <stream/utils.hpp>
+#include <pds/utils.hpp>
 
 
-namespace stream { namespace loglog {
+namespace pds { namespace loglog {
 
     ///////////////////////////////////////////////////////////////////////////////
     //
@@ -221,4 +221,4 @@ namespace hyperloglog {
     }
 
 }  // namespace hloglog
-}  // namespace stream
+}  // namespace pds

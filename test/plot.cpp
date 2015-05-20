@@ -1,4 +1,4 @@
-#include "stream/loglog.hpp"
+#include "pds/loglog.hpp"
 
 #include <iostream>
 #include <random>
@@ -6,8 +6,8 @@
 int
 main(int argc, char *argv[])
 {
-    stream::loglog::counter<int, 1<<10> c;
-    stream::hyperloglog::counter<int, 1<<10> h;
+    pds::loglog::counter<int, 1024> c;
+    pds::hyperloglog::counter<int, 1024> h;
 
     std::mt19937 rand;
 

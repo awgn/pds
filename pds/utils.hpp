@@ -1,7 +1,7 @@
 #include <cstdint>
 #include <cstddef>
 
-namespace stream
+namespace pds
 {
     template <typename Tp, Tp mask, int k>
     inline Tp swap_bits(Tp p)

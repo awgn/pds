@@ -1,4 +1,4 @@
-#include "stream/loglog.hpp"
+#include "pds/loglog.hpp"
 
 #include <iostream>
 
@@ -13,7 +13,7 @@ Context(LogLog)
     {
         std::cout << "LogLog: " << std::endl;
 
-        stream::loglog::counter<std::string> llc;
+        pds::loglog::counter<std::string> llc;
 
         for(int n = 0; n < 10; n++)
         {
@@ -24,7 +24,7 @@ Context(LogLog)
 
     Test(merge)
     {
-        stream::loglog::counter<std::string> llc;
+        pds::loglog::counter<std::string> llc;
         llc += llc;
     }
 }
@@ -36,7 +36,7 @@ Context(Hyper)
     {
         std::cout << "HyperLogLog: " << std::endl;
 
-        stream::hyperloglog::counter<std::string> llc;
+        pds::hyperloglog::counter<std::string> llc;
 
         for(int n = 0; n < 10; n++)
         {
@@ -47,7 +47,7 @@ Context(Hyper)
 
     Test(merge)
     {
-        stream::hyperloglog::counter<std::string> llc;
+        pds::hyperloglog::counter<std::string> llc;
         llc += llc;
 
         Assert( llc.cardinality(), is_equal_to(0));
