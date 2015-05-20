@@ -114,6 +114,18 @@ namespace pds {
             return *this;
         }
 
+        //
+        // reset counter
+        //
+
+        void
+        reset()
+        {
+            for(size_t n = 0; n < M; n++)
+                m_[n] = 0;
+        }
+
+
     private:
 
         Hash hash_;
