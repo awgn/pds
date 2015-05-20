@@ -14,7 +14,7 @@ Context(LogLog)
     {
         std::cout << "LogLog: " << std::endl;
 
-        pds::loglog::counter<std::string> llc;
+        pds::loglog<std::string> llc;
 
         for(int n = 0; n < 10; n++)
         {
@@ -25,7 +25,7 @@ Context(LogLog)
 
     Test(merge)
     {
-        pds::loglog::counter<std::string> llc;
+        pds::loglog<std::string> llc;
         llc += llc;
     }
 }
@@ -37,7 +37,7 @@ Context(Hyper)
     {
         std::cout << "HyperLogLog: " << std::endl;
 
-        pds::hyperloglog::counter<std::string> llc;
+        pds::hyperloglog<std::string> llc;
 
         for(int n = 0; n < 10; n++)
         {
@@ -48,7 +48,7 @@ Context(Hyper)
 
     Test(merge)
     {
-        pds::hyperloglog::counter<std::string> llc;
+        pds::hyperloglog<std::string> llc;
         llc += llc;
 
         Assert( llc.cardinality(), is_equal_to(0));

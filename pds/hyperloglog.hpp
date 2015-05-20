@@ -12,7 +12,7 @@
 #include <pds/utils.hpp>
 
 
-namespace pds { namespace hyperloglog {
+namespace pds {
 
     ///////////////////////////////////////////////////////////////////////////////
     //
@@ -35,12 +35,9 @@ namespace pds { namespace hyperloglog {
     template <> struct static_alpha<32> { static constexpr double value = 0.697;  };
     template <> struct static_alpha<64> { static constexpr double value = 0.709;  };
 
-    //
-    // counter
-    //
 
     template <typename T, size_t M = 1024, typename Hash = std::hash<T>>
-    class counter
+    class hyperloglog
     {
         static_assert((M&(M-1)) == 0, "HLLC: groups (m) must be a power of two");
 
@@ -48,7 +45,7 @@ namespace pds { namespace hyperloglog {
 
         constexpr static size_t K = log2(M);
 
-        counter()
+        hyperloglog()
         : m_(M)
         { }
 
@@ -106,11 +103,11 @@ namespace pds { namespace hyperloglog {
         }
 
         //
-        // merge two counters
+        // merge from another counter
         //
 
-        counter &
-        operator+=(counter const &other)
+        hyperloglog &
+        operator+=(hyperloglog const &other)
         {
             for(size_t n = 0; n < M; n++)
                 m_[n] = std::max(m_[n], other.m_[n]);
@@ -126,10 +123,9 @@ namespace pds { namespace hyperloglog {
 
 
     template <typename T, size_t M,  typename Hash>
-    counter<T, M, Hash> operator+(counter<T, M, Hash> lhs, counter<T, M, Hash> const &rhs)
+    hyperloglog<T, M, Hash> operator+(hyperloglog<T, M, Hash> lhs, hyperloglog<T, M, Hash> const &rhs)
     {
         return lhs += rhs;
     }
 
-}  // namespace hyperloglog
 }  // namespace pds

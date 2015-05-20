@@ -12,7 +12,7 @@
 #include <pds/utils.hpp>
 
 
-namespace pds { namespace loglog {
+namespace pds {
 
     ///////////////////////////////////////////////////////////////////////////////
     //
@@ -25,7 +25,7 @@ namespace pds { namespace loglog {
     //
 
     template <typename T, size_t M = 1024, typename Hash = std::hash<T>>
-    class counter
+    class loglog
     {
         static_assert((M&(M-1)) == 0, "LLC: groups (m) must be a power of two");
 
@@ -33,7 +33,7 @@ namespace pds { namespace loglog {
 
         constexpr static size_t K = log2(M);
 
-        counter()
+        loglog()
         : m_(M)
         { }
 
@@ -65,11 +65,11 @@ namespace pds { namespace loglog {
         }
 
         //
-        // merge two counters
+        // merge from another counter
         //
 
-        counter &
-        operator+=(counter const &other)
+        loglog &
+        operator+=(loglog const &other)
         {
             for(size_t n = 0; n < M; n++)
                 m_[n] = std::max(m_[n], other.m_[n]);
@@ -92,10 +92,9 @@ namespace pds { namespace loglog {
 
 
     template <typename T, size_t M,  typename Hash>
-    counter<T, M, Hash> operator+(counter<T, M, Hash> lhs, counter<T, M, Hash> const &rhs)
+    loglog<T, M, Hash> operator+(loglog<T, M, Hash> lhs, loglog<T, M, Hash> const &rhs)
     {
         return lhs += rhs;
     }
 
-} // namespace loglog
 }  // namespace pds
