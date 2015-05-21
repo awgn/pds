@@ -53,4 +53,24 @@ namespace pds
     {
         return value == 1 ? 0 : 1 + log2(value >> 1);
     }
+
+    //
+    // make_tuple: like make_tuple but possibly accepts a fewer number of arguments.
+    // Arguments missing are default constructed.
+    //
+
+    template <typename ...Ts>
+    inline std::tuple<Ts...>
+    make_tuple()
+    {
+        return std::make_tuple(Ts{}...);
+    }
+
+    template <typename T, typename ...Ts, typename X, typename ...Xs>
+    inline std::tuple<T, Ts...>
+    make_tuple(X && x, Xs&& ... xs)
+    {
+        return std::tuple_cat(std::make_tuple(std::forward<X>(x)),
+                                   make_tuple<Ts...>(std::forward<Xs>(xs)...));
+    }
 }
