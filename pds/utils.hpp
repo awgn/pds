@@ -82,7 +82,7 @@ namespace pds
 
     //
     // make_tuple: like make_tuple but possibly accepts a fewer number of arguments.
-    // Arguments missing are default constructed.
+    // Missing arguments are default constructed.
     //
 
     template <typename ...Ts>
