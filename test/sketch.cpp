@@ -102,11 +102,11 @@ Context(Sketch)
         Assert(sk.count(11), is_equal_to(0));
     }
 
-    Test(reset_with)
+    Test(for_all)
     {
         pds::sketch<int, 1024, std::hash<int> > sk;
 
-        sk.reset_with([](int &n)
+        sk.for_all([](int &n)
         {
             n = 42;
         });

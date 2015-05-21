@@ -107,8 +107,7 @@ namespace pds {
         }
 
         template <typename Fun>
-        void
-        reset_with(Fun f)
+        void for_all(Fun f)
         {
             for(auto & v : data_)
                 for(auto & e : v)
