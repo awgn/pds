@@ -136,6 +136,45 @@ namespace pds {
                     f(e);
         }
 
+        // return the size of the sketch
+        //
+
+        constexpr inline std::pair<size_t, size_t>
+        size() const
+        {
+            return std::make_pair(sizeof...(Fs), W);
+        }
+
+        //
+        // merge from another sketch
+        //
+
+        sketch &
+        operator+=(sketch const &other)
+        {
+            for(size_t i = 0; i < sizeof...(Fs); ++i)
+            {
+                auto & lhs = data_[i];
+                auto & rhs = other.data_[i];
+                for(size_t j = 0; j < W; ++j)
+                    lhs[j] += rhs[j];
+            }
+            return *this;
+        }
+
+        sketch &
+        operator-=(sketch const &other)
+        {
+            for(size_t i = 0; i < sizeof...(Fs); ++i)
+            {
+                auto & lhs = data_[i];
+                auto & rhs = other.data_[i];
+                for(size_t j = 0; j < W; ++j)
+                    lhs[j] -= rhs[j];
+            }
+            return *this;
+        }
+
     private:
 
         template <typename Tp, typename Fun, size_t ...N>
@@ -155,5 +194,17 @@ namespace pds {
         std::vector<std::vector<T>> data_;
         std::tuple<Fs...> fs_;
     };
+
+    template <typename T, std::size_t W, typename ...Fs>
+    sketch<T, W, Fs...> operator+(sketch<T, W, Fs...> lhs, sketch<T, W, Fs...> const &rhs)
+    {
+        return lhs += rhs;
+    }
+
+    template <typename T, std::size_t W, typename ...Fs>
+    sketch<T, W, Fs...> operator-(sketch<T, W, Fs...> lhs, sketch<T, W, Fs...> const &rhs)
+    {
+        return lhs -= rhs;
+    }
 
 } // namespace pds

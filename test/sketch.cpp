@@ -115,6 +115,27 @@ Context(Sketch)
         Assert(sk.count(42), is_equal_to(42));
         Assert(sk.count(0xdeadbeef), is_equal_to(42));
     }
+
+    Test(size)
+    {
+        pds::sketch<int, 1024, std::hash<int> > s;
+        Assert(s.size() == std::make_pair<size_t, size_t>(1, 1024));
+    }
+
+    Test(merge)
+    {
+        pds::sketch<uint32_t, 1024, std::hash<int> > s1, s2;
+
+        s1.increment(1);
+        s2.increment(1);
+        s2.increment(2);
+
+        auto s = s1 + s2;
+
+        Assert(s.count(1), is_equal_to(2));
+        Assert(s.count(2), is_equal_to(1));
+        Assert(s.count(3), is_equal_to(0));
+    }
 }
 
 
