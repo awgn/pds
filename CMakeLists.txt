@@ -6,4 +6,3 @@ include_directories(hdr .)
 
 add_executable(test-loglog test/loglog.cpp)
 add_executable(test-sketch test/sketch.cpp)
-add_executable(test-plot   test/plot.cpp)
