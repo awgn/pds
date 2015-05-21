@@ -44,6 +44,12 @@ namespace pds {
     struct ctor_args_t { };
     constexpr ctor_args_t ctor_args = ctor_args_t();
 
+    //
+    // count-min sketch data structure:
+    //
+    // Cormode, Graham (2009). "Count-min sketch" (PDF). Encyclopedia of Database Systems. Springer. pp. 511–516.
+    //
+
     template <typename T, std::size_t W, typename ...Fs>
     struct sketch
     {
@@ -57,6 +63,10 @@ namespace pds {
         : data_(sizeof...(Fs), std::vector<T>(W))
         , fs_(make_tuple<Fs...>(std::forward<Hs>(hs)...))
         { }
+
+        //
+        // update functions
+        //
 
         template <typename Tp, typename Fun>
         void update_with(Tp const &data, Fun action)
@@ -131,14 +141,14 @@ namespace pds {
         template <typename Tp, typename Fun, size_t ...N>
         void apply(Tp const &data, Fun action, std::index_sequence<N...>)
         {
-            auto sink { (action(data_.at(N).at(std::get<N>(fs_)(data) % W)),0)... };
+            auto sink = { (action(data_[N][std::get<N>(fs_)(data) % W]),0)... };
             (void)sink;
         }
 
         template <typename Tp, typename Fun, size_t ...N>
         void apply(Tp const &data, Fun action, std::index_sequence<N...>) const
         {
-            auto sink { (action(data_.at(N).at(std::get<N>(fs_)(data) % W)),0)... };
+            auto sink = { (action(data_[N][std::get<N>(fs_)(data) % W]),0)... };
             (void)sink;
         }
 
