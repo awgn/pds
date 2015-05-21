@@ -36,15 +36,27 @@
 
 namespace pds {
 
-    template < typename T, std::size_t W, typename ...Fs>
+    //
+    // placeholder type used to disambiguate variadic forwarding
+    // ctor from copy/move ctor
+    //
+
+    struct ctor_args_t { };
+    constexpr ctor_args_t ctor_args = ctor_args_t();
+
+    template <typename T, std::size_t W, typename ...Fs>
     struct sketch
     {
+        sketch()
+        : data_(sizeof...(Fs), std::vector<T>(W))
+        , fs_(make_tuple<Fs...>())
+        { }
+
         template <typename ...Hs>
-        sketch(Hs && ...hs)
+        sketch(ctor_args_t, Hs && ...hs)
         : data_(sizeof...(Fs), std::vector<T>(W))
         , fs_(make_tuple<Fs...>(std::forward<Hs>(hs)...))
-        {
-        }
+        { }
 
         template <typename Tp, typename Fun>
         void update_with(Tp const &data, Fun action)

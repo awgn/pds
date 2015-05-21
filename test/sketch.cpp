@@ -6,7 +6,7 @@
 #include <yats.hpp>
 
 using namespace yats;
-
+using namespace pds;
 
 Context(Sketch)
 {
@@ -43,7 +43,7 @@ Context(Sketch)
 
     Test(hash)
     {
-        pds::sketch<int, 1024, konst_hash, konst_hash> sk(konst_hash{42}, konst_hash{11});
+        pds::sketch<int, 1024, konst_hash, konst_hash> sk(ctor_args, konst_hash{42}, konst_hash{11});
 
         sk.update_with(1, [](int &ctr)
         {
