@@ -26,9 +26,7 @@ Context(Sketch)
     struct konst_hash
     {
         konst_hash()
-        {
-            throw std::runtime_error("konst!");
-        }
+        { }
 
         konst_hash(int n)
         : value_(n)
