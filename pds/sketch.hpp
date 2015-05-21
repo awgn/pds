@@ -31,6 +31,8 @@
 #include <vector>
 #include <limits>
 #include <tuple>
+#include <numeric>
+#include <algorithm>
 
 #include "pds/utils.hpp"
 
@@ -45,7 +47,7 @@ namespace pds {
     constexpr ctor_args_t ctor_args = ctor_args_t();
 
     //
-    // count-min sketch data structure:
+    // Sketch data structure:
     //
     // Cormode, Graham (2009). "Count-min sketch" (PDF). Encyclopedia of Database Systems. Springer. pp. 511–516.
     //
@@ -101,7 +103,7 @@ namespace pds {
         }
 
         //
-        // min-count
+        // count min estimation
         //
 
         template <typename Tp>
@@ -115,6 +117,34 @@ namespace pds {
 
             return n;
         }
+
+        //
+        // k-ary estimation
+        //
+
+        template <typename Tp>
+        double estimate(Tp const &data) const
+        {
+            std::vector<double> va;
+
+            double sum = std::accumulate(std::begin(data_[0]),
+                                         std::end(data_[0]),
+                                         size_t{0});
+
+            update_with(data, [&](T const &ctr) {
+                auto va_ = (ctr - sum/W)/(1.0 - 1.0/W);
+                va.push_back(va_);
+            });
+
+            std::sort(std::begin(va), std::end(va));
+
+            auto m = va.size()/2;
+
+            return (va.size() & 1) ?
+                    va.at(m) :
+                   (va.at(m) + va.at(m-1))/2;
+        }
+
 
         //
         // reset all counters in the sketch

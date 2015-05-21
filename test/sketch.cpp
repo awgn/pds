@@ -136,6 +136,25 @@ Context(Sketch)
         Assert(s.count(2), is_equal_to(1));
         Assert(s.count(3), is_equal_to(0));
     }
+
+
+    Test(k_ary_estimate)
+    {
+        pds::sketch<int32_t, 1024, std::hash<int> > s1;
+
+        s1.increment(1);
+        s1.increment(1);
+        s1.increment(1);
+
+        s1.increment(2);
+        s1.increment(2);
+
+        s1.increment(3);
+
+        std::cout << "k-ary estimate: " << s1.estimate(1) << std::endl;
+        std::cout << "k-ary estimate: " << s1.estimate(2) << std::endl;
+        std::cout << "k-ary estimate: " << s1.estimate(3) << std::endl;
+    }
 }
 
 
