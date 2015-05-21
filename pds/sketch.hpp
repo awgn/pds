@@ -47,13 +47,13 @@ namespace pds {
         }
 
         template <typename Tp, typename Fun>
-        void with(Tp const &data, Fun action)
+        void update_with(Tp const &data, Fun action)
         {
             apply(data, action, std::make_index_sequence<sizeof...(Fs)>());
         }
 
         template <typename Tp, typename Fun>
-        void with(Tp const &data, Fun action) const
+        void update_with(Tp const &data, Fun action) const
         {
             apply(data, action, std::make_index_sequence<sizeof...(Fs)>());
         }
@@ -65,7 +65,7 @@ namespace pds {
         template <typename Tp>
         void increment(Tp const &data)
         {
-            with(data, [](T &ctr) { ++ctr; });
+            update_with(data, [](T &ctr) { ++ctr; });
         }
 
         //
@@ -75,7 +75,7 @@ namespace pds {
         template <typename Tp>
         void decrement(Tp const &data)
         {
-            with(data, [](T &ctr) { --ctr; });
+            update_with(data, [](T &ctr) { --ctr; });
         }
 
         //
@@ -87,7 +87,7 @@ namespace pds {
         {
             T n = std::numeric_limits<T>::max();
 
-            with(data, [&](T const &ctr) {
+            update_with(data, [&](T const &ctr) {
                 n = std::min(n, ctr);
             });
 
