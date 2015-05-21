@@ -35,7 +35,7 @@
 #include <cmath>
 #include <cstring>
 
-#include <pds/utils.hpp>
+#include <pds/utility.hpp>
 
 
 namespace pds {

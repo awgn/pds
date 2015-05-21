@@ -34,7 +34,7 @@
 #include <numeric>
 #include <algorithm>
 
-#include "pds/utils.hpp"
+#include "pds/utility.hpp"
 
 namespace pds {
 
