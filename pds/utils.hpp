@@ -27,6 +27,7 @@
 #pragma once
 #include <cstdint>
 #include <cstddef>
+#include <tuple>
 
 namespace pds
 {
@@ -99,4 +100,13 @@ namespace pds
         return std::tuple_cat(std::make_tuple(std::forward<X>(x)),
                                    make_tuple<Ts...>(std::forward<Xs>(xs)...));
     }
+
+    //
+    // placeholder type used to disambiguate variadic forwarding
+    // ctor from copy/move ctor
+    //
+
+    struct ctor_args_t { };
+    constexpr ctor_args_t ctor_args = ctor_args_t();
+
 }

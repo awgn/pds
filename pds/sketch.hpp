@@ -39,14 +39,6 @@
 namespace pds {
 
     //
-    // placeholder type used to disambiguate variadic forwarding
-    // ctor from copy/move ctor
-    //
-
-    struct ctor_args_t { };
-    constexpr ctor_args_t ctor_args = ctor_args_t();
-
-    //
     // Sketch data structure:
     //
     // Cormode, Graham (2009). "Count-min sketch" (PDF). Encyclopedia of Database Systems. Springer. pp. 511–516.
@@ -144,7 +136,6 @@ namespace pds {
                     va.at(m) :
                    (va.at(m) + va.at(m-1))/2;
         }
-
 
         //
         // reset all counters in the sketch
