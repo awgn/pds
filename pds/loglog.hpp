@@ -68,7 +68,7 @@ namespace pds {
 
         void operator()(T const &elem)
         {
-            auto h = hash_(elem);
+            auto h = Hash{}(elem);
             auto j = h & ((1 << K) -1);
             auto v = h >> K;
 
@@ -121,7 +121,6 @@ namespace pds {
             return 1.0 / std::pow(gamma * ratio, value);
         }
 
-        Hash hash_;
         std::vector<uint8_t> m_;
         size_t rank_;
     };

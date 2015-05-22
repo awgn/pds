@@ -109,4 +109,11 @@ namespace pds
     struct ctor_args_t { };
     constexpr ctor_args_t ctor_args = ctor_args_t();
 
+    //
+    // type_at: get N-type from a pack
+    //
+
+    template <size_t N, typename ...Ts>
+    using type_at = typename std::tuple_element<N, std::tuple<Ts...>>::type;
+
 }

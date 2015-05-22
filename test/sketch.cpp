@@ -28,22 +28,16 @@ Context(Sketch)
         konst_hash()
         { }
 
-        konst_hash(int n)
-        : value_(n)
-        {}
-
         size_t operator()(int) const
         {
-            return value_;
+            return 42;
         }
-
-        size_t value_;
     };
 
 
     Test(hash)
     {
-        pds::sketch<int, 1024, konst_hash, konst_hash> sk(ctor_args, konst_hash{42}, konst_hash{11});
+        pds::sketch<int, 1024, konst_hash, konst_hash> sk;
 
         sk.update_with(1, [](int &ctr)
         {
@@ -59,7 +53,7 @@ Context(Sketch)
             ctr = 2;
         });
 
-        Assert (sk.count(1), is_equal_to(2));
+        Assert (sk.count(1),  is_equal_to(2));
         Assert (sk.count(11), is_equal_to(2));
         Assert (sk.count(42), is_equal_to(2));
     }

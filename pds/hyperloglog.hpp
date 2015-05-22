@@ -81,7 +81,7 @@ namespace pds {
 
         void operator()(T const &elem)
         {
-            auto h = hash_(elem);
+            auto h = Hash{}(elem);
             auto j = h & ((1ULL << K) -1);
             auto v = h >> K;
 
@@ -154,7 +154,6 @@ namespace pds {
 
     private:
 
-        Hash hash_;
         std::vector<uint8_t> m_;
         size_t rank_;
     };
