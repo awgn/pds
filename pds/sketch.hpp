@@ -176,19 +176,6 @@ namespace pds {
             return *this;
         }
 
-        sketch &
-        operator-=(sketch const &other)
-        {
-            for(size_t i = 0; i < sizeof...(Fs); ++i)
-            {
-                auto & lhs = data_[i];
-                auto & rhs = other.data_[i];
-                for(size_t j = 0; j < W; ++j)
-                    lhs[j] -= rhs[j];
-            }
-            return *this;
-        }
-
     private:
 
         template <typename Tp, typename Fun, size_t ...N>
@@ -212,12 +199,6 @@ namespace pds {
     sketch<T, W, Fs...> operator+(sketch<T, W, Fs...> lhs, sketch<T, W, Fs...> const &rhs)
     {
         return lhs += rhs;
-    }
-
-    template <typename T, std::size_t W, typename ...Fs>
-    sketch<T, W, Fs...> operator-(sketch<T, W, Fs...> lhs, sketch<T, W, Fs...> const &rhs)
-    {
-        return lhs -= rhs;
     }
 
 } // namespace pds
