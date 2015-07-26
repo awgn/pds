@@ -8,9 +8,21 @@
 using namespace yats;
 using namespace pds;
 
-Context(Sketch)
+struct konst_hash
 {
-    Test(simple)
+    konst_hash()
+    { }
+
+    size_t operator()(int) const
+    {
+        return 42;
+    }
+};
+
+
+auto g = Group("Sketch")
+
+    .Single("simple", []
     {
         pds::sketch<int, 1024, std::hash<int>, std::hash<int> > sk;
 
@@ -20,22 +32,10 @@ Context(Sketch)
         });
 
         Assert( sk.count(10) == 1 );
-    }
+    })
 
 
-    struct konst_hash
-    {
-        konst_hash()
-        { }
-
-        size_t operator()(int) const
-        {
-            return 42;
-        }
-    };
-
-
-    Test(hash)
+    .Single("hash", []
     {
         pds::sketch<int, 1024, konst_hash, konst_hash> sk;
 
@@ -56,10 +56,10 @@ Context(Sketch)
         Assert (sk.count(1),  is_equal_to(2));
         Assert (sk.count(11), is_equal_to(2));
         Assert (sk.count(42), is_equal_to(2));
-    }
+    })
 
 
-    Test(incr_decr)
+    .Single("incr_decr", []
     {
         pds::sketch<int, 1024, std::hash<int> > sk;
 
@@ -79,9 +79,9 @@ Context(Sketch)
         Assert(sk.count(7), is_equal_to(1));
 
         Assert(sk.count(42), is_equal_to(0));
-    }
+    })
 
-    Test(reset)
+    .Single("reset", []
     {
         pds::sketch<int, 1024, std::hash<int> > sk;
 
@@ -92,9 +92,9 @@ Context(Sketch)
 
         sk.reset();
         Assert(sk.count(11), is_equal_to(0));
-    }
+    })
 
-    Test(for_all)
+    .Single("for_all", []
     {
         pds::sketch<int, 1024, std::hash<int> > sk;
 
@@ -108,15 +108,15 @@ Context(Sketch)
         Assert(sk.count(3), is_equal_to(42));
         Assert(sk.count(42), is_equal_to(42));
         Assert(sk.count(0xdeadbeef), is_equal_to(42));
-    }
+    })
 
-    Test(size)
+    .Single("size", []
     {
         pds::sketch<int, 1024, std::hash<int> > s;
         Assert(s.size() == std::make_pair<size_t, size_t>(1, 1024));
-    }
+    })
 
-    Test(merge)
+    .Single("merge", []
     {
         pds::sketch<uint32_t, 1024, std::hash<int> > s1, s2;
 
@@ -129,10 +129,10 @@ Context(Sketch)
         Assert(s.count(1), is_equal_to(2));
         Assert(s.count(2), is_equal_to(1));
         Assert(s.count(3), is_equal_to(0));
-    }
+    })
 
 
-    Test(k_ary_estimate)
+    .Single("k_ary_estimate", []
     {
         pds::sketch<int32_t, 1024, std::hash<int> > s1;
 
@@ -148,8 +148,8 @@ Context(Sketch)
         std::cout << "k-ary estimate: " << s1.estimate(1) << std::endl;
         std::cout << "k-ary estimate: " << s1.estimate(2) << std::endl;
         std::cout << "k-ary estimate: " << s1.estimate(3) << std::endl;
-    }
-}
+    })
+    ;
 
 
 int

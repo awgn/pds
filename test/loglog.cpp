@@ -8,9 +8,9 @@
 using namespace yats;
 
 
-Context(LogLog)
-{
-    Test(simple)
+auto g = Group("LogLog")
+
+    .Single("simple", []
     {
         std::cout << "LogLog: " << std::endl;
 
@@ -21,19 +21,19 @@ Context(LogLog)
             llc("123ABC" + std::to_string(n));
             std::cout << n << ": -> " << llc.cardinality() << std::endl;
         }
-    }
+    })
 
-    Test(merge)
+    .Single("merge", []
     {
         pds::loglog<std::string> llc;
         llc += llc;
-    }
-}
+    })
+    ;
 
 
-Context(Hyper)
-{
-    Test(simple)
+auto h = Group("Hyper")
+
+    .Single("simple", []
     {
         std::cout << "HyperLogLog: " << std::endl;
 
@@ -44,17 +44,16 @@ Context(Hyper)
             llc("123ABC" + std::to_string(n));
             std::cout << n << ": -> " << llc.cardinality() << std::endl;
         }
-    }
+    })
 
-    Test(merge)
+    .Single("merge", []
     {
         pds::hyperloglog<std::string> llc;
         llc += llc;
 
         Assert( llc.cardinality(), is_equal_to(0));
-    }
-}
-
+    })
+    ;
 
 int
 main(int argc, char *argv[])
