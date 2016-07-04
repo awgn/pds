@@ -44,11 +44,11 @@ namespace pds {
     // Cormode, Graham (2009). "Count-min sketch" (PDF). Encyclopedia of Database Systems. Springer. pp. 511–516.
     //
 
-    template <typename T, std::size_t W, typename ...Fs>
+    template <typename T, std::size_t W, typename ...Hs>
     struct sketch
     {
         sketch()
-        : data_(sizeof...(Fs), std::vector<T>(W))
+        : data_(sizeof...(Hs), std::vector<T>(W))
         { }
 
         //
@@ -56,15 +56,15 @@ namespace pds {
         //
 
         template <typename Tp, typename Fun>
-        void update_with(Tp const &data, Fun action)
+        void update_counter(Tp const &elem, Fun action)
         {
-            apply(data, action, std::make_index_sequence<sizeof...(Fs)>());
+            apply(elem, action, std::make_index_sequence<sizeof...(Hs)>());
         }
 
         template <typename Tp, typename Fun>
-        void update_with(Tp const &data, Fun action) const
+        void update_counter(Tp const &elem, Fun action) const
         {
-            apply(data, action, std::make_index_sequence<sizeof...(Fs)>());
+            apply(elem, action, std::make_index_sequence<sizeof...(Hs)>());
         }
 
         //
@@ -72,9 +72,9 @@ namespace pds {
         //
 
         template <typename Tp>
-        void increment(Tp const &data)
+        void increment_counter(Tp const &elem)
         {
-            update_with(data, [](T &ctr) { ++ctr; });
+            update_counter(elem, [](T &ctr) { ++ctr; });
         }
 
         //
@@ -82,9 +82,9 @@ namespace pds {
         //
 
         template <typename Tp>
-        void decrement(Tp const &data)
+        void decrement_counter(Tp const &elem)
         {
-            update_with(data, [](T &ctr) { --ctr; });
+            update_counter(elem, [](T &ctr) { --ctr; });
         }
 
         //
@@ -92,11 +92,11 @@ namespace pds {
         //
 
         template <typename Tp>
-        T count(Tp const &data) const
+        T count(Tp const &elem) const
         {
             T n = std::numeric_limits<T>::max();
 
-            update_with(data, [&](T const &ctr) {
+            update_counter(elem, [&](T const &ctr) {
                 n = std::min(n, ctr);
             });
 
@@ -108,7 +108,7 @@ namespace pds {
         //
 
         template <typename Tp>
-        double estimate(Tp const &data) const
+        double estimate(Tp const &elem) const
         {
             std::vector<double> va;
 
@@ -116,7 +116,7 @@ namespace pds {
                                          std::end(data_[0]),
                                          size_t{0});
 
-            update_with(data, [&](T const &ctr) {
+            update_counter(elem, [&](T const &ctr) {
                 auto va_ = (ctr - sum/W)/(1.0 - 1.0/W);
                 va.push_back(va_);
             });
@@ -156,7 +156,7 @@ namespace pds {
         constexpr inline std::pair<size_t, size_t>
         size() const
         {
-            return std::make_pair(sizeof...(Fs), W);
+            return std::make_pair(sizeof...(Hs), W);
         }
 
         //
@@ -166,7 +166,7 @@ namespace pds {
         sketch &
         operator+=(sketch const &other)
         {
-            for(size_t i = 0; i < sizeof...(Fs); ++i)
+            for(size_t i = 0; i < sizeof...(Hs); ++i)
             {
                 auto & lhs = data_[i];
                 auto & rhs = other.data_[i];
@@ -179,25 +179,25 @@ namespace pds {
     private:
 
         template <typename Tp, typename Fun, size_t ...N>
-        void apply(Tp const &data, Fun action, std::index_sequence<N...>)
+        void apply(Tp const &elem, Fun action, std::index_sequence<N...>)
         {
-            auto sink = { (action(data_[N][utility::type_at<N,Fs...>{}(data) % W]),0)... };
+            auto sink = { (action(data_[N][utility::type_at<N,Hs...>{}(elem) % W]),0)... };
             (void)sink;
         }
 
         template <typename Tp, typename Fun, size_t ...N>
-        void apply(Tp const &data, Fun action, std::index_sequence<N...>) const
+        void apply(Tp const &elem, Fun action, std::index_sequence<N...>) const
         {
-            auto sink = { (action(data_[N][utility::type_at<N,Fs...>{}(data) % W]),0)... };
+            auto sink = { (action(data_[N][utility::type_at<N,Hs...>{}(elem) % W]),0)... };
             (void)sink;
         }
 
         std::vector<std::vector<T>> data_;
     };
 
-    template <typename T, std::size_t W, typename ...Fs>
-    inline sketch<T, W, Fs...> 
-    operator+(sketch<T, W, Fs...> lhs, sketch<T, W, Fs...> const &rhs)
+    template <typename T, std::size_t W, typename ...Hs>
+    inline sketch<T, W, Hs...> 
+    operator+(sketch<T, W, Hs...> lhs, sketch<T, W, Hs...> const &rhs)
     {
         return lhs += rhs;
     }
