@@ -85,7 +85,7 @@ namespace pds {
             auto j = h & ((1ULL << K) -1);
             auto v = h >> K;
 
-            m_[j] = std::max<size_t>( m_[j], rank(v) );
+            m_[j] = std::max<size_t>( m_[j], utility::rank(v) );
         }
 
         //
@@ -160,7 +160,8 @@ namespace pds {
 
 
     template <typename T, size_t M,  typename Hash>
-    hyperloglog<T, M, Hash> operator+(hyperloglog<T, M, Hash> lhs, hyperloglog<T, M, Hash> const &rhs)
+    inline hyperloglog<T, M, Hash> 
+    operator+(hyperloglog<T, M, Hash> lhs, hyperloglog<T, M, Hash> const &rhs)
     {
         return lhs += rhs;
     }

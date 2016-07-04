@@ -29,8 +29,8 @@
 #include <cstddef>
 #include <tuple>
 
-namespace pds
-{
+namespace pds { namespace utility {
+
     template <typename Tp, Tp mask, int k>
     inline Tp swap_bits(Tp p)
     {
@@ -116,4 +116,5 @@ namespace pds
     template <size_t N, typename ...Ts>
     using type_at = typename std::tuple_element<N, std::tuple<Ts...>>::type;
 
-}
+} // namespace utility
+} // nemespace pds

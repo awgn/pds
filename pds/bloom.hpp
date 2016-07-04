@@ -106,7 +106,8 @@ namespace pds {
     };
 
     template <size_t M, typename ...Ks>
-    inline bloom_filter<M, Ks...> operator+(bloom_filter<M, Ks...> lhs, bloom_filter<M, Ks...> const &rhs)
+    inline bloom_filter<M, Ks...> 
+    operator+(bloom_filter<M, Ks...> lhs, bloom_filter<M, Ks...> const &rhs)
     {
         return lhs += rhs;
     }

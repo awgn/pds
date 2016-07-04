@@ -181,14 +181,14 @@ namespace pds {
         template <typename Tp, typename Fun, size_t ...N>
         void apply(Tp const &data, Fun action, std::index_sequence<N...>)
         {
-            auto sink = { (action(data_[N][type_at<N,Fs...>{}(data) % W]),0)... };
+            auto sink = { (action(data_[N][utility::type_at<N,Fs...>{}(data) % W]),0)... };
             (void)sink;
         }
 
         template <typename Tp, typename Fun, size_t ...N>
         void apply(Tp const &data, Fun action, std::index_sequence<N...>) const
         {
-            auto sink = { (action(data_[N][type_at<N,Fs...>{}(data) % W]),0)... };
+            auto sink = { (action(data_[N][utility::type_at<N,Fs...>{}(data) % W]),0)... };
             (void)sink;
         }
 
@@ -196,7 +196,8 @@ namespace pds {
     };
 
     template <typename T, std::size_t W, typename ...Fs>
-    sketch<T, W, Fs...> operator+(sketch<T, W, Fs...> lhs, sketch<T, W, Fs...> const &rhs)
+    inline sketch<T, W, Fs...> 
+    operator+(sketch<T, W, Fs...> lhs, sketch<T, W, Fs...> const &rhs)
     {
         return lhs += rhs;
     }
