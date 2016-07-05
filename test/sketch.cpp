@@ -1,4 +1,5 @@
 #include "pds/sketch.hpp"
+#include "pds/range.hpp"
 
 #include <iostream>
 #include <stdexcept>
@@ -150,6 +151,41 @@ auto g = Group("Sketch")
         std::cout << "k-ary estimate: " << s1.estimate(3) << std::endl;
     })
     
+
+    .Single("filter", []
+    {
+        pds::sketch<uint32_t, 1024, std::hash<int> > s;
+
+        s.increment_buckets(1);
+
+        s.increment_buckets(2);
+        s.increment_buckets(2);
+
+        s.increment_buckets(3);
+        s.increment_buckets(3);
+        s.increment_buckets(3);
+
+
+        auto k1 = s.filter(pds::numeric_range<int>(0,10), [](uint32_t const &bucket) {
+                                return bucket > 0;
+                          });
+
+        Assert ( k1 == std::vector<int>{1, 2, 3} );
+        
+        auto k2 = s.filter(pds::numeric_range<int>(0,10), [](uint32_t const &bucket) {
+                                return bucket > 1;
+                          });
+
+        Assert ( k2 == std::vector<int>{2, 3} );
+        
+        auto k3 = s.filter(pds::numeric_range<int>(0,10), [](uint32_t const &bucket) {
+                                return bucket > 2;
+                          });
+
+        Assert ( k3 == std::vector<int>{3} );
+
+    })
+
     ;
 
 

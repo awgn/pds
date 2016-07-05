@@ -119,6 +119,33 @@ namespace pds {
 
 
         //
+        // filter the keys whose the given predicate holds for each
+        // bucket
+        //
+        
+        template <typename Range, typename Predicate>
+        auto filter(Range keys, Predicate pred) const
+        {   
+            std::vector<typename Range::value_type> ret;
+
+            while(auto elem = keys())
+            {
+                bool resp = true;
+
+                visit_buckets(*elem, [&](T const &bucket) 
+                {
+                    resp &= pred(bucket);
+                }); 
+
+                if (resp)
+                    ret.push_back(*elem);
+            }
+
+            return ret;
+        }
+
+
+        //
         // k-ary estimation
         //
 
