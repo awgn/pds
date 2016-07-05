@@ -215,6 +215,20 @@ auto g = Group("Sketch")
         ips.increment_buckets(0xff114200);
         ips.increment_buckets(0xffffff00);
 
+        auto bs = ips.buckets([](uint32_t bucket) {
+                                    return bucket != 0; 
+                             });
+
+        std::cout << std::dec;
+
+        for(auto &v : bs) {
+            std::cout << "| ";
+            for(auto &e : v)
+                std::cout << e << ' ';
+            std::cout << std::endl;
+        }
+
+        std::cout << "..." << std::endl;
 
         auto fip = ips.filter(pds::numeric_range<uint32_t>(0,std::numeric_limits<uint32_t>::max()), [](uint32_t bucket) {
                                 return bucket != 0;
@@ -222,6 +236,8 @@ auto g = Group("Sketch")
 
         for(auto ip : fip)
             std::cout << std::hex << ip << std::endl;
+
+
     })
     ;
 
