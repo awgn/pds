@@ -68,23 +68,23 @@ namespace pds {
         }
 
         //
-        // increment counters
+        // increment buckets
         //
 
         template <typename Tp>
-        void increment_counter(Tp const &elem)
+        void increment_buckets(Tp const &elem)
         {
-            update_buckets(elem, [](T &ctr) { ++ctr; });
+            update_buckets(elem, [](T &bucket) { ++bucket; });
         }
 
         //
-        // decrement counters
+        // decrement buckets
         //
 
         template <typename Tp>
-        void decrement_counter(Tp const &elem)
+        void decrement_buckets(Tp const &elem)
         {
-            update_buckets(elem, [](T &ctr) { --ctr; });
+            update_buckets(elem, [](T &bucket) { --bucket; });
         }
 
         //
@@ -96,8 +96,8 @@ namespace pds {
         {
             T n = std::numeric_limits<T>::max();
 
-            visit_buckets(elem, [&](T const &ctr) {
-                n = std::min(n, ctr);
+            visit_buckets(elem, [&](T const &bucket) {
+                n = std::min(n, bucket);
             });
 
             return n;
@@ -109,9 +109,9 @@ namespace pds {
         {
             std::vector<T> ret;
 
-            visit_buckets(elem, [&](T const &ctr) 
+            visit_buckets(elem, [&](T const &bucket) 
             {
-                ret.push_back(ctr);
+                ret.push_back(bucket);
             });
 
             return ret;
@@ -131,8 +131,8 @@ namespace pds {
                                          std::end(data_[0]),
                                          size_t{0});
 
-            visit_buckets(elem, [&](T const &ctr) {
-                auto va_ = (ctr - sum/W)/(1.0 - 1.0/W);
+            visit_buckets(elem, [&](T const &bucket) {
+                auto va_ = (bucket - sum/W)/(1.0 - 1.0/W);
                 va.push_back(va_);
             });
 
@@ -146,7 +146,7 @@ namespace pds {
         }
 
         //
-        // reset all counters in the sketch
+        // reset all buckets in the sketch
         //
 
         void

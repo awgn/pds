@@ -63,19 +63,19 @@ auto g = Group("Sketch")
     {
         pds::sketch<int, 1024, std::hash<int> > sk;
 
-        sk.increment_counter(11);
+        sk.increment_buckets(11);
         Assert(sk.count(11), is_equal_to(1));
-        sk.increment_counter(11);
+        sk.increment_buckets(11);
         Assert(sk.count(11), is_equal_to(2));
-        sk.increment_counter(11);
+        sk.increment_buckets(11);
         Assert(sk.count(11), is_equal_to(3));
 
-        sk.increment_counter(7);
+        sk.increment_buckets(7);
         Assert(sk.count(7), is_equal_to(1));
-        sk.increment_counter(7);
+        sk.increment_buckets(7);
         Assert(sk.count(7), is_equal_to(2));
 
-        sk.decrement_counter(7);
+        sk.decrement_buckets(7);
         Assert(sk.count(7), is_equal_to(1));
 
         Assert(sk.count(42), is_equal_to(0));
@@ -85,9 +85,9 @@ auto g = Group("Sketch")
     {
         pds::sketch<int, 1024, std::hash<int> > sk;
 
-        sk.increment_counter(11);
-        sk.increment_counter(11);
-        sk.increment_counter(11);
+        sk.increment_buckets(11);
+        sk.increment_buckets(11);
+        sk.increment_buckets(11);
         Assert(sk.count(11), is_equal_to(3));
 
         sk.reset();
@@ -120,9 +120,9 @@ auto g = Group("Sketch")
     {
         pds::sketch<uint32_t, 1024, std::hash<int> > s1, s2;
 
-        s1.increment_counter(1);
-        s2.increment_counter(1);
-        s2.increment_counter(2);
+        s1.increment_buckets(1);
+        s2.increment_buckets(1);
+        s2.increment_buckets(2);
 
         auto s = s1 + s2;
 
@@ -136,19 +136,20 @@ auto g = Group("Sketch")
     {
         pds::sketch<int32_t, 1024, std::hash<int> > s1;
 
-        s1.increment_counter(1);
-        s1.increment_counter(1);
-        s1.increment_counter(1);
+        s1.increment_buckets(1);
+        s1.increment_buckets(1);
+        s1.increment_buckets(1);
 
-        s1.increment_counter(2);
-        s1.increment_counter(2);
+        s1.increment_buckets(2);
+        s1.increment_buckets(2);
 
-        s1.increment_counter(3);
+        s1.increment_buckets(3);
 
         std::cout << "k-ary estimate: " << s1.estimate(1) << std::endl;
         std::cout << "k-ary estimate: " << s1.estimate(2) << std::endl;
         std::cout << "k-ary estimate: " << s1.estimate(3) << std::endl;
     })
+    
     ;
 
 
