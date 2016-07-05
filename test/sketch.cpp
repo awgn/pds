@@ -46,7 +46,7 @@ auto g = Group("Sketch")
     {
         pds::sketch<int, 1024, std::hash<int>, std::hash<int> > sk;
 
-        sk.update_buckets(10, [](int &ctr)
+        sk.foreach_bucket(10, [](int &ctr)
         {
             ctr = 1;
         });
@@ -59,7 +59,7 @@ auto g = Group("Sketch")
     {
         pds::sketch<int, 1024, konst_hash, konst_hash> sk;
 
-        sk.update_buckets(1, [](int &ctr)
+        sk.foreach_bucket(1, [](int &ctr)
         {
             std::cout << (void *)&ctr << " = " << ctr << std::endl;
             ctr = 1;
@@ -67,7 +67,7 @@ auto g = Group("Sketch")
 
         Assert (sk.count(1), is_equal_to(1));
 
-        sk.update_buckets(11, [](int &ctr)
+        sk.foreach_bucket(11, [](int &ctr)
         {
             std::cout << (void *)&ctr << " = " << ctr << std::endl;
             ctr = 2;
@@ -118,7 +118,7 @@ auto g = Group("Sketch")
     {
         pds::sketch<int, 1024, std::hash<int> > sk;
 
-        sk.for_all([](int &n)
+        sk.forall([](int &n)
         {
             n = 42;
         });

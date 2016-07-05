@@ -52,19 +52,19 @@ namespace pds {
         { }
 
         //
-        // update/visit functions
+        // foreach bucket... 
         //
 
         template <typename Tp, typename Fun>
-        void update_buckets(Tp const &elem, Fun action)
+        void foreach_bucket(Tp const &elem, Fun action)
         {
-            apply(elem, action, std::make_index_sequence<sizeof...(Hs)>());
+            foreach_(elem, action, std::make_index_sequence<sizeof...(Hs)>());
         }
 
         template <typename Tp, typename Fun>
-        void visit_buckets(Tp const &elem, Fun action) const
+        void foreach_bucket(Tp const &elem, Fun action) const
         {
-            apply(elem, action, std::make_index_sequence<sizeof...(Hs)>());
+            foreach_(elem, action, std::make_index_sequence<sizeof...(Hs)>());
         }
 
         //
@@ -74,7 +74,7 @@ namespace pds {
         template <typename Tp>
         void increment_buckets(Tp const &elem)
         {
-            update_buckets(elem, [](T &bucket) { ++bucket; });
+            foreach_bucket(elem, [](T &bucket) { ++bucket; });
         }
 
         //
@@ -84,7 +84,7 @@ namespace pds {
         template <typename Tp>
         void decrement_buckets(Tp const &elem)
         {
-            update_buckets(elem, [](T &bucket) { --bucket; });
+            foreach_bucket(elem, [](T &bucket) { --bucket; });
         }
 
         //
@@ -96,7 +96,7 @@ namespace pds {
         {
             T n = std::numeric_limits<T>::max();
 
-            visit_buckets(elem, [&](T const &bucket) {
+            foreach_bucket(elem, [&](T const &bucket) {
                 n = std::min(n, bucket);
             });
 
@@ -109,7 +109,7 @@ namespace pds {
         {
             std::vector<T> ret;
 
-            visit_buckets(elem, [&](T const &bucket) 
+            foreach_bucket(elem, [&](T const &bucket) 
             {
                 ret.push_back(bucket);
             });
@@ -132,7 +132,7 @@ namespace pds {
             {
                 bool resp = true;
 
-                visit_buckets(*elem, [&](T const &bucket) 
+                foreach_bucket(*elem, [&](T const &bucket) 
                 {
                     resp &= pred(bucket);
                 }); 
@@ -158,7 +158,7 @@ namespace pds {
                                          std::end(data_[0]),
                                          size_t{0});
 
-            visit_buckets(elem, [&](T const &bucket) {
+            foreach_bucket(elem, [&](T const &bucket) {
                 auto va_ = (bucket - sum/W)/(1.0 - 1.0/W);
                 va.push_back(va_);
             });
@@ -185,7 +185,7 @@ namespace pds {
         }
 
         template <typename Fun>
-        void for_all(Fun f)
+        void forall(Fun f)
         {
             for(auto & v : data_)
                 for(auto & e : v)
@@ -220,16 +220,40 @@ namespace pds {
         }
 
     private:
+        
+        template <typename Tp, typename Fun, size_t ...N>
+        void cont_(Tp const &elem, Fun action, std::index_sequence<N...>)
+        {
+            bool run = true;
+            auto cont = [&](T &bkt) {
+                if (run)
+                    run = action(bkt);
+            };
+            auto sink = { (cont(data_[N][utility::type_at<N,Hs...>{}(elem) % W]),0)... };
+            (void)sink;
+        }
 
         template <typename Tp, typename Fun, size_t ...N>
-        void apply(Tp const &elem, Fun action, std::index_sequence<N...>)
+        void cont_(Tp const &elem, Fun action, std::index_sequence<N...>) const
+        {
+            bool run = true;
+            auto cont = [&](T const &bkt) {
+                if (run)
+                    run = action(bkt);
+            };
+            auto sink = { (cont(data_[N][utility::type_at<N,Hs...>{}(elem) % W]),0)... };
+            (void)sink;
+        }
+
+        template <typename Tp, typename Fun, size_t ...N>
+        void foreach_(Tp const &elem, Fun action, std::index_sequence<N...>)
         {
             auto sink = { (action(data_[N][utility::type_at<N,Hs...>{}(elem) % W]),0)... };
             (void)sink;
         }
 
         template <typename Tp, typename Fun, size_t ...N>
-        void apply(Tp const &elem, Fun action, std::index_sequence<N...>) const
+        void foreach_(Tp const &elem, Fun action, std::index_sequence<N...>) const
         {
             auto sink = { (action(data_[N][utility::type_at<N,Hs...>{}(elem) % W]),0)... };
             (void)sink;
