@@ -52,17 +52,17 @@ namespace pds {
         { }
 
         //
-        // update functions
+        // update/visit functions
         //
 
         template <typename Tp, typename Fun>
-        void update_counter(Tp const &elem, Fun action)
+        void update_buckets(Tp const &elem, Fun action)
         {
             apply(elem, action, std::make_index_sequence<sizeof...(Hs)>());
         }
 
         template <typename Tp, typename Fun>
-        void update_counter(Tp const &elem, Fun action) const
+        void visit_buckets(Tp const &elem, Fun action) const
         {
             apply(elem, action, std::make_index_sequence<sizeof...(Hs)>());
         }
@@ -74,7 +74,7 @@ namespace pds {
         template <typename Tp>
         void increment_counter(Tp const &elem)
         {
-            update_counter(elem, [](T &ctr) { ++ctr; });
+            update_buckets(elem, [](T &ctr) { ++ctr; });
         }
 
         //
@@ -84,7 +84,7 @@ namespace pds {
         template <typename Tp>
         void decrement_counter(Tp const &elem)
         {
-            update_counter(elem, [](T &ctr) { --ctr; });
+            update_buckets(elem, [](T &ctr) { --ctr; });
         }
 
         //
@@ -96,12 +96,27 @@ namespace pds {
         {
             T n = std::numeric_limits<T>::max();
 
-            update_counter(elem, [&](T const &ctr) {
+            visit_buckets(elem, [&](T const &ctr) {
                 n = std::min(n, ctr);
             });
 
             return n;
         }
+
+        template <typename Tp>
+        std::vector<T>
+        buckets(Tp const &elem) const
+        {
+            std::vector<T> ret;
+
+            visit_buckets(elem, [&](T const &ctr) 
+            {
+                ret.push_back(ctr);
+            });
+
+            return ret;
+        }
+
 
         //
         // k-ary estimation
@@ -116,7 +131,7 @@ namespace pds {
                                          std::end(data_[0]),
                                          size_t{0});
 
-            update_counter(elem, [&](T const &ctr) {
+            visit_buckets(elem, [&](T const &ctr) {
                 auto va_ = (ctr - sum/W)/(1.0 - 1.0/W);
                 va.push_back(va_);
             });
@@ -150,6 +165,7 @@ namespace pds {
                     f(e);
         }
 
+        //
         // return the size of the sketch
         //
 

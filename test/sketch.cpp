@@ -26,7 +26,7 @@ auto g = Group("Sketch")
     {
         pds::sketch<int, 1024, std::hash<int>, std::hash<int> > sk;
 
-        sk.update_counter(10, [](int &ctr)
+        sk.update_buckets(10, [](int &ctr)
         {
             ctr = 1;
         });
@@ -39,7 +39,7 @@ auto g = Group("Sketch")
     {
         pds::sketch<int, 1024, konst_hash, konst_hash> sk;
 
-        sk.update_counter(1, [](int &ctr)
+        sk.update_buckets(1, [](int &ctr)
         {
             std::cout << (void *)&ctr << " = " << ctr << std::endl;
             ctr = 1;
@@ -47,7 +47,7 @@ auto g = Group("Sketch")
 
         Assert (sk.count(1), is_equal_to(1));
 
-        sk.update_counter(11, [](int &ctr)
+        sk.update_buckets(11, [](int &ctr)
         {
             std::cout << (void *)&ctr << " = " << ctr << std::endl;
             ctr = 2;
