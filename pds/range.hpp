@@ -43,6 +43,8 @@ namespace pds {
     template <typename T>
     struct numeric_range
     {
+        using value_type = T;
+
         numeric_range(T min, T max)
         : min_(min)
         , max_(max)
