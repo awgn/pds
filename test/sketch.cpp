@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <stdexcept>
+#include <limits>
 
 #include <yats.hpp>
 
@@ -17,6 +18,24 @@ struct konst_hash
     size_t operator()(int) const
     {
         return 42;
+    }
+};
+
+
+struct hash1
+{
+    uint32_t operator()(uint32_t x) const
+    {
+        return x & (x >> 16) & 0xffff;
+    }
+};
+
+
+struct hash2
+{
+    uint32_t operator()(uint32_t x) const
+    {
+        return x & (x >> 13) & 0xffff;
     }
 };
 
@@ -186,6 +205,24 @@ auto g = Group("Sketch")
 
     })
 
+
+    .Single("large_filter", []
+    {
+        pds::sketch<uint32_t, 65535, std::hash<uint32_t>,
+                                     hash1,
+                                     hash2> ips;
+
+        ips.increment_buckets(0xff114200);
+        ips.increment_buckets(0xffffff00);
+
+
+        auto fip = ips.filter(pds::numeric_range<uint32_t>(0,std::numeric_limits<uint32_t>::max()), [](uint32_t bucket) {
+                                return bucket != 0;
+                          });
+
+        for(auto ip : fip)
+            std::cout << std::hex << ip << std::endl;
+    })
     ;
 
 
