@@ -36,6 +36,58 @@ namespace pds {
     using std::experimental::optional;
     using std::experimental::nullopt;
 
+    template <typename T>
+    struct range_iterator
+    {
+        range_iterator(T min, T max)
+        : min_(min)
+        , max_(max)
+        , value_(min)
+        { }
+
+        range_iterator()
+        : min_()
+        , max_()
+        , value_()
+        { }
+
+        T
+        operator*() const
+        {
+            return *value_;
+        }
+
+        range_iterator &
+        operator++()
+        {
+            if (value_) {
+                if (*value_ != max_)
+                    (*value_)++;
+                else
+                    value_ = nullopt;
+            }
+
+            return *this;
+        }
+
+        friend 
+        bool operator==(const range_iterator &lhs, const range_iterator &rhs)
+        {
+            return lhs.value_ == rhs.value_;
+        }
+        
+        friend 
+        bool operator!=(const range_iterator &lhs, const range_iterator &rhs)
+        {
+            return lhs.value_ != rhs.value_;
+        }
+        
+        T min_;
+        T max_;
+        mutable optional<T> value_;
+    };
+
+
     //
     // numeric generator
     //
@@ -48,8 +100,12 @@ namespace pds {
         numeric_range(T min, T max)
         : min_(min)
         , max_(max)
-        , value_(min)
-        { }
+        { 
+            if (min < max)
+                value_ = min;
+            else
+                value_ = nullopt;
+        }
 
         T min_;
         T max_;
@@ -69,6 +125,31 @@ namespace pds {
 
             return r;
         }
+
+        range_iterator<T>
+        begin() const
+        {
+            return range_iterator<T>(min_, max_);
+        }
+        
+        range_iterator<T>
+        end() const
+        {
+            return range_iterator<T>();
+        }
+        
+        range_iterator<T>
+        cbegin() const
+        {
+            return range_iterator<T>(min_, max_);
+        }
+        
+        range_iterator<T>
+        cend() const
+        {
+            return range_iterator<T>();
+        }
     };
+
 
 } // namespace pds
