@@ -35,6 +35,7 @@
 #include <algorithm>
 
 #include "pds/utility.hpp"
+#include "pds/tuple.hpp"
 
 namespace pds {
 
@@ -49,6 +50,12 @@ namespace pds {
     {
         sketch()
         : data_(sizeof...(Hs), std::vector<T>(W))
+        , bits_(0)
+        { }
+
+        sketch(size_t bits)
+        : data_(sizeof...(Hs), std::vector<T>(W))
+        , bits_(bits)
         { }
 
         //
@@ -259,7 +266,20 @@ namespace pds {
         }
 
     private:
-        
+
+        template <typename Tp, typename Fun>
+        uint64_t hash_(Fun hfun, Tp const &elem) const
+        {
+            return hfun(elem);
+        }
+
+        template <typename Fun, typename ...Ti>
+        uint64_t hash_(Fun hfun, std::tuple<Ti...> const &elem) const
+        {
+            return pds::hash_tuple(hfun, elem, bits_);
+        }
+
+
         template <typename Tp, typename Fun, size_t ...N>
         bool continuation_(Tp const &elem, Fun action, std::index_sequence<N...>)
         {
@@ -268,7 +288,7 @@ namespace pds {
                 if (run)
                     run = action(bkt);
             };
-            auto sink = { (cont(data_[N][utility::type_at<N,Hs...>{}(elem) % W]),0)... };
+            auto sink = { (cont(data_[N][hash_(utility::type_at<N, Hs...>{}, elem) % W]),0)... };
             (void)sink;
             return run;
         }
@@ -281,12 +301,13 @@ namespace pds {
                 if (run)
                     run = action(bkt);
             };
-            auto sink = { (cont(data_[N][utility::type_at<N,Hs...>{}(elem) % W]),0)... };
+            auto sink = { (cont(data_[N][hash_(utility::type_at<N,Hs...>{}, elem) % W]),0)... };
             (void)sink;
             return run;
         }
 
         std::vector<std::vector<T>> data_;
+        size_t bits_;
     };
 
     template <typename T, std::size_t W, typename ...Hs>

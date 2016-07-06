@@ -48,7 +48,10 @@ namespace pds {
  
         if ((bits * sizeof...(Ts)) > sizeof(h)*8)
             throw std::runtime_error("hash_fold: too many hash values or hash size too large");
- 
+
+        if (bits == 0)
+            throw std::runtime_error("hash_fold: hash component bits cannot be 0");
+
         pds::tuple_foreach([&](auto &elem) {
                 h <<= bits;
                 h |= (fun(elem) & ((1 << bits)-1));
