@@ -147,8 +147,7 @@ namespace pds {
         }
         
         //
-        // given a predicate, return the index of 
-        // buckets, whose value holds 
+        // return the index of buckets whose value holds the given predicate 
         //
         
         template <typename Fun>
@@ -181,10 +180,25 @@ namespace pds {
         {   
             std::vector<typename Range::value_type> ret;
 
-            while(auto elem = keys())
+            for(auto elem : keys)
             {
-                if (continuation_bucket(*elem, pred))
-                    ret.push_back(*elem);
+                if (continuation_bucket(elem, pred))
+                    ret.push_back(elem);
+            }
+
+            return ret;
+        }
+        
+        
+        template <typename Iter, typename Predicate>
+        auto filter(Iter it, Iter end, Predicate pred) const
+        {   
+            std::vector<decltype(*it)> ret;
+
+            for(; it != end; ++it) 
+            {
+                if (continuation_bucket(*it, pred))
+                    ret.push_back(*it);
             }
 
             return ret;
