@@ -215,11 +215,11 @@ auto g = Group("Sketch")
         ips.increment_buckets(0xff114200);
         ips.increment_buckets(0xffffff00);
 
-        auto bs = ips.buckets([](uint32_t bucket) {
-                                    return bucket != 0; 
-                             });
+        auto bs = ips.index_buckets([](uint32_t bucket) {
+                                        return bucket != 0; 
+                                    });
 
-        std::cout << std::dec;
+        std::cout << std::dec << std::endl;
 
         for(auto &v : bs) {
             std::cout << "| ";

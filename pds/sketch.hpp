@@ -121,6 +121,11 @@ namespace pds {
             return n;
         }
 
+        //
+        // given the element, return the value of 
+        // the corresponding buckets (1 per line)
+        //
+        
         template <typename Tp>
         auto element_buckets(Tp const &elem) const
         {
@@ -134,9 +139,13 @@ namespace pds {
             return ret;
         }
         
+        //
+        // given a predicate, return the index of 
+        // buckets, whose value holds 
+        //
         
         template <typename Fun>
-        auto buckets(Fun pred) const
+        auto index_buckets(Fun pred) const
         {
             std::vector<std::vector<size_t>> ret;
 
