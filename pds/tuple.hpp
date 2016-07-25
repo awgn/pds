@@ -17,7 +17,14 @@ namespace pds {
             std::initializer_list<bool> sink {(fun(std::get<N>(std::forward<TupleT>(tup))), true)...};
             (void)sink;
         }
-    }
+        
+        template <typename Fun, typename TupleT, size_t ...N>
+        void tuple_foreach_index(Fun fun, TupleT &&tup, std::index_sequence<N...>)
+        {
+            std::initializer_list<bool> sink {(fun(std::integral_constant<size_t,N>{}, std::get<N>(std::forward<TupleT>(tup))), true)...};
+            (void)sink;
+        }
+   }
     
     //
     // index_tuple: create indexes for a tuple
@@ -34,6 +41,12 @@ namespace pds {
     void tuple_foreach(Fun fun, TupleT &&tup)
     {
         return details::tuple_foreach(fun, std::forward<TupleT>(tup), index_tuple<TupleT>{});
+    }
+    
+    template <typename Fun, typename TupleT>
+    void tuple_foreach_index(Fun fun, TupleT &&tup)
+    {
+        return details::tuple_foreach_index(fun, std::forward<TupleT>(tup), index_tuple<TupleT>{});
     }
 
     //
