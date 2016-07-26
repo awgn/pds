@@ -34,11 +34,12 @@
 
 namespace pds {
 
-    template <typename Hash, size_t N = 8>
+    template <size_t N, typename ...Hs>
     struct ModularHash
     {
-        ModularHash(Hash h = Hash())
-        : hash_(h)
+        template <typename ...Xs>
+        ModularHash(Xs...xs)
+        : hash_(pds::make_tuple<Hs...>(xs...))
         { }
 
 
@@ -50,10 +51,12 @@ namespace pds {
 
             uint64_t ret = 0;
 
-            pds::tuple_foreach([&](auto &elem) 
+            pds::tuple_foreach_index([&](auto I, auto &elem) 
             {
+                constexpr auto i = decltype(I)::value;
+
                 ret <<= N;
-                ret |= (hash_(elem) & make_mask(N));
+                ret |= (std::get<i>(hash_)(elem) & make_mask(N));
             }, value);
 
             return ret;
@@ -62,13 +65,13 @@ namespace pds {
         template <size_t I, typename ...Ts>
         auto partial(std::tuple<Ts...> const &value)
         {
-            return hash_(std::get<I>(value)) & make_mask(N);
+            return std::get<I>(hash_)(std::get<I>(value)) & make_mask(N);
         }
 
 
     private:
 
-        Hash hash_;
+        std::tuple<Hs...> hash_;
     };
 
 

@@ -21,20 +21,28 @@ auto g = Group("Tuple")
 
     .Single("modular", []
     {
-        pds::ModularHash<std::hash<int>> mod(std::hash<int>{});
+        pds::ModularHash<8, std::hash<int>> mod(std::hash<int>{});
 
         Assert(mod(std::make_tuple(0)) == 0);
         Assert(mod(std::make_tuple(42)) == 42);
         Assert(mod(std::make_tuple(256)) == 0);
 
 
-        Assert(mod(std::make_tuple(0,0)) == 0);
-        Assert(mod(std::make_tuple(0,1)) == 1);
+    })
+    .Single("modular2", []
+    {
+        pds::ModularHash<8, std::hash<int>,
+                            std::hash<int>> mod2(std::hash<int>{});
 
-        Assert(mod(std::make_tuple(1, 0)) == 256);
-        Assert(mod(std::make_tuple(1, 1)) == 257);
+        Assert(mod2(std::make_tuple(0,0)) == 0);
+        Assert(mod2(std::make_tuple(0,1)) == 1);
 
-    });
+        Assert(mod2(std::make_tuple(1, 0)) == 256);
+        Assert(mod2(std::make_tuple(1, 1)) == 257);
+
+    })
+
+    ;
 
 
 
