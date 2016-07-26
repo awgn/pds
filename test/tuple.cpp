@@ -42,6 +42,34 @@ auto g = Group("Tuple")
 
     })
 
+    .Single("foreach", []
+    {
+        auto t = std::make_tuple<int, int, int>(1,2,3);
+
+        pds::tuple_foreach([](auto &elem) {
+
+            std::cout << elem << ' ';
+
+        }, t);
+
+        std::cout << std::endl;
+    })
+    
+    .Single("continue", []
+    {
+        auto t = std::make_tuple<int, int, int>(1,2,3);
+
+        size_t n = 0;
+        pds::tuple_continue([&](auto &elem) 
+        {
+            std::cout << elem << ' ';
+            return ++n < 2;
+
+        }, t);
+
+        std::cout << std::endl;
+    })
+
     ;
 
 

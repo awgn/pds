@@ -52,6 +52,31 @@ namespace pds {
             std::initializer_list<bool> sink {(fun(std::integral_constant<size_t,N>{}, std::get<N>(std::forward<TupleT>(tup))), true)...};
             (void)sink;
         }
+        
+        template <typename Fun, typename TupleT, size_t ...N>
+        void tuple_continue(Fun fun, TupleT &&tup, std::index_sequence<N...>)
+        {
+            bool run = true;
+            auto cont = [&](auto &elem) {
+                if (run)
+                    run = fun(elem);
+            };
+            auto sink = {(cont(std::get<N>(std::forward<TupleT>(tup))), 0)...};
+            (void)sink;
+        }
+        
+        template <typename Fun, typename TupleT, size_t ...N>
+        void tuple_continue_index(Fun fun, TupleT &&tup, std::index_sequence<N...>)
+        {
+            bool run = true;
+            auto cont = [&](auto I, auto &elem) {
+                if (run)
+                    run = fun(I, elem);
+            };
+            auto sink = {(cont(std::integral_constant<size_t,N>{}, std::get<N>(std::forward<TupleT>(tup))), true)...};
+            (void)sink;
+        }
+        
    }
     
     //
@@ -75,6 +100,19 @@ namespace pds {
     void tuple_foreach_index(Fun fun, TupleT &&tup)
     {
         return details::tuple_foreach_index(fun, std::forward<TupleT>(tup), index_tuple<TupleT>{});
+    }
+    
+    
+    template <typename Fun, typename TupleT>
+    void tuple_continue(Fun fun, TupleT &&tup)
+    {
+        return details::tuple_continue(fun, std::forward<TupleT>(tup), index_tuple<TupleT>{});
+    }
+    
+    template <typename Fun, typename TupleT>
+    void tuple_continue_index(Fun fun, TupleT &&tup)
+    {
+        return details::tuple_continue_index(fun, std::forward<TupleT>(tup), index_tuple<TupleT>{});
     }
     
     //
