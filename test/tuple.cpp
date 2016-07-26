@@ -1,5 +1,5 @@
 #include "pds/tuple.hpp"
-#include "pds/modular.hpp"
+#include "pds/hash.hpp"
 
 #include <iostream>
 
@@ -21,7 +21,21 @@ auto g = Group("Tuple")
 
     .Single("modular", []
     {
+        pds::ModularHash<std::hash<int>> mod(std::hash<int>{});
+
+        Assert(mod(std::make_tuple(0)) == 0);
+        Assert(mod(std::make_tuple(42)) == 42);
+        Assert(mod(std::make_tuple(256)) == 0);
+
+
+        Assert(mod(std::make_tuple(0,0)) == 0);
+        Assert(mod(std::make_tuple(0,1)) == 1);
+
+        Assert(mod(std::make_tuple(1, 0)) == 256);
+        Assert(mod(std::make_tuple(1, 1)) == 257);
+
     });
+
 
 
 int
