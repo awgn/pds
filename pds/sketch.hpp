@@ -26,6 +26,9 @@
 
 #pragma once
 
+#include <pds/utility.hpp>
+#include <pds/tuple.hpp>
+
 #include <cstddef>
 #include <utility>
 #include <vector>
@@ -34,8 +37,6 @@
 #include <numeric>
 #include <algorithm>
 
-#include "pds/utility.hpp"
-#include "pds/tuple.hpp"
 
 namespace pds {
 

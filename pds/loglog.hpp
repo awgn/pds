@@ -26,6 +26,8 @@
 
 #pragma once
 
+#include <pds/utility.hpp>
+
 #include <vector>
 #include <stdexcept>
 #include <functional>
@@ -33,8 +35,6 @@
 #include <numeric>
 #include <cmath>
 #include <cstring>
-
-#include <pds/utility.hpp>
 
 
 namespace pds {

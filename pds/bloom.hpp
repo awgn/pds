@@ -26,9 +26,10 @@
 
 #pragma once
 
+#include <pds/utility.hpp>
+
 #include <vector>
 
-#include "pds/utility.hpp"
 
 
 namespace pds {

@@ -25,6 +25,9 @@
  ******************************************************************************/
 
 #pragma once
+
+#include <pds/utility.hpp>
+
 #include <iostream>
 
 #include <vector>
@@ -35,7 +38,6 @@
 #include <cmath>
 #include <cstring>
 
-#include <pds/utility.hpp>
 
 
 namespace pds {
