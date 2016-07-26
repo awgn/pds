@@ -49,14 +49,10 @@ namespace pds {
     template <typename T, std::size_t W, typename ...Hs>
     struct sketch
     {
-        sketch()
+        template <typename ...Xs>
+        sketch(Xs ... xs)
         : data_(sizeof...(Hs), std::vector<T>(W))
-        , bits_(0)
-        { }
-
-        sketch(size_t bits)
-        : data_(sizeof...(Hs), std::vector<T>(W))
-        , bits_(bits)
+        , hash_(pds::make_tuple<Hs...>(xs...))
         { }
 
         //
@@ -290,7 +286,7 @@ namespace pds {
                 if (run)
                     run = action(bkt);
             };
-            auto sink = { (cont(data_[N][type_at<N, Hs...>{}(elem) % W]),0)... };
+            auto sink = { (cont(data_[N][std::get<N>(hash_)(elem) % W]),0)... };
             (void)sink;
             return run;
         }
@@ -303,13 +299,14 @@ namespace pds {
                 if (run)
                     run = action(bkt);
             };
-            auto sink = { (cont(data_[N][type_at<N,Hs...>{}(elem) % W]),0)... };
+            auto sink = { (cont(data_[N][std::get<N>(hash_)(elem) % W]),0)... };
             (void)sink;
             return run;
         }
 
         std::vector<std::vector<T>> data_;
-        size_t bits_;
+        std::tuple<Hs...> hash_;
+
     };
 
     template <typename T, std::size_t W, typename ...Hs>

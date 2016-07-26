@@ -73,8 +73,10 @@ namespace pds {
 
         constexpr static size_t K = log2(M);
 
-        hyperloglog()
+        template <typename X = Hash>
+        hyperloglog(X x = X())
         : m_(M)
+        , hash_(x)
         { }
 
         //
@@ -158,6 +160,7 @@ namespace pds {
 
         std::vector<uint8_t> m_;
         size_t rank_;
+        Hash hash_;
     };
 
 

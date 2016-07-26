@@ -43,9 +43,12 @@ namespace pds {
     {
         static_assert((M & 7) == 0, "bloom_filter size must be a multiple of 8");
 
-        bloom_filter()
+        template <typename ...Xs>
+        bloom_filter(Xs ... xs)
         : filter_(M >> 3)
+        , hash_(pds::make_tuple<Ks...>(xs...))
         { }
+
 
         template <typename T>
         void set(T const &data)
@@ -96,7 +99,7 @@ namespace pds {
             auto sink = {
                 (action([&, this]() -> std::pair<uint8_t &, size_t>
                         {
-                            auto h = type_at<N, Ks...>{}(data);
+                            auto h = std::get<N>(hash_)(data);
                             return std::pair<uint8_t &, size_t> { filter_[h % (M >> 3)], h & 7 };
 
                         }() ),0)... };
@@ -104,6 +107,8 @@ namespace pds {
         }
 
         std::vector<uint8_t> filter_;
+
+        std::tuple<Ks...> hash_;
     };
 
     template <size_t M, typename ...Ks>

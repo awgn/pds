@@ -58,8 +58,10 @@ namespace pds {
 
         constexpr static size_t K = log2(M);
 
-        loglog()
+        template <typename X = Hash>
+        loglog(X x = X())
         : m_(M)
+        , hash_(x)
         { }
 
         //
@@ -68,7 +70,7 @@ namespace pds {
 
         void operator()(T const &elem)
         {
-            auto h = Hash{}(elem);
+            auto h = hash_(elem);
             auto j = h & ((1 << K) -1);
             auto v = h >> K;
 
@@ -123,6 +125,7 @@ namespace pds {
 
         std::vector<uint8_t> m_;
         size_t rank_;
+        Hash hash_;
     };
 
 
