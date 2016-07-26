@@ -1,4 +1,5 @@
 #include "pds/tuple.hpp"
+#include "pds/modular.hpp"
 
 #include <iostream>
 
@@ -18,11 +19,8 @@ struct id
 
 auto g = Group("Tuple")
 
-    .Single("hash_tuple", []
+    .Single("modular", []
     {
-        auto t = std::make_tuple(1,2);
-
-        Assert( pds::hash_tuple(id{}, t, 2) == ((1<<2) | 2));
     });
 
 
