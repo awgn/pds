@@ -25,11 +25,12 @@
  ******************************************************************************/
 
 #pragma once
+
 #include <cstdint>
 #include <cstddef>
 #include <tuple>
 
-namespace pds { namespace utility {
+namespace pds { 
 
     template <typename Tp, Tp mask, int k>
     inline Tp swap_bits(Tp p)
@@ -116,5 +117,4 @@ namespace pds { namespace utility {
     template <size_t N, typename ...Ts>
     using type_at = typename std::tuple_element<N, std::tuple<Ts...>>::type;
 
-} // namespace utility
 } // nemespace pds

@@ -72,7 +72,7 @@ namespace pds {
             auto j = h & ((1 << K) -1);
             auto v = h >> K;
 
-            m_[j] = std::max<size_t>( m_[j], utility::rank(v) );
+            m_[j] = std::max<size_t>( m_[j], rank(v) );
         }
 
         //

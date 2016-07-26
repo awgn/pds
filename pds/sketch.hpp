@@ -282,19 +282,6 @@ namespace pds {
 
     private:
 
-        template <typename Tp, typename Fun>
-        uint64_t hash_(Fun hfun, Tp const &elem) const
-        {
-            return hfun(elem);
-        }
-
-        template <typename Fun, typename ...Ti>
-        uint64_t hash_(Fun hfun, std::tuple<Ti...> const &elem) const
-        {
-            return pds::hash_tuple(hfun, elem, bits_);
-        }
-
-
         template <typename Tp, typename Fun, size_t ...N>
         bool continuation_(Tp const &elem, Fun action, std::index_sequence<N...>)
         {
@@ -303,7 +290,7 @@ namespace pds {
                 if (run)
                     run = action(bkt);
             };
-            auto sink = { (cont(data_[N][hash_(utility::type_at<N, Hs...>{}, elem) % W]),0)... };
+            auto sink = { (cont(data_[N][type_at<N, Hs...>{}(elem) % W]),0)... };
             (void)sink;
             return run;
         }
@@ -316,7 +303,7 @@ namespace pds {
                 if (run)
                     run = action(bkt);
             };
-            auto sink = { (cont(data_[N][hash_(utility::type_at<N,Hs...>{}, elem) % W]),0)... };
+            auto sink = { (cont(data_[N][type_at<N,Hs...>{}(elem) % W]),0)... };
             (void)sink;
             return run;
         }
