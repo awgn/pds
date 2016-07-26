@@ -82,33 +82,6 @@ namespace pds {
         return value == 1 ? 0 : 1 + log2(value >> 1);
     }
 
-    //
-    // make_tuple: like make_tuple but possibly accepts a fewer number of arguments.
-    // Missing arguments are default constructed.
-    //
-
-    template <typename ...Ts>
-    inline std::tuple<Ts...>
-    make_tuple()
-    {
-        return std::make_tuple(Ts{}...);
-    }
-
-    template <typename T, typename ...Ts, typename X, typename ...Xs>
-    inline std::tuple<T, Ts...>
-    make_tuple(X && x, Xs&& ... xs)
-    {
-        return std::tuple_cat(std::make_tuple(std::forward<X>(x)),
-                                   make_tuple<Ts...>(std::forward<Xs>(xs)...));
-    }
-
-    //
-    // placeholder type used to disambiguate variadic forwarding
-    // ctor from copy/move ctor
-    //
-
-    struct ctor_args_t { };
-    constexpr ctor_args_t ctor_args = ctor_args_t();
 
     //
     // type_at: get N-type from a pack
@@ -116,5 +89,16 @@ namespace pds {
 
     template <size_t N, typename ...Ts>
     using type_at = typename std::tuple_element<N, std::tuple<Ts...>>::type;
+
+
+    //
+    // make mask
+    //
+
+    constexpr uint64_t make_mask(int bits)
+    {
+        return (1ULL << bits)-1;
+    }
+
 
 } // nemespace pds

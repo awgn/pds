@@ -76,30 +76,27 @@ namespace pds {
     {
         return details::tuple_foreach_index(fun, std::forward<TupleT>(tup), index_tuple<TupleT>{});
     }
-
-    //
-    // hash_tuple...
-    //
     
-    template <typename Hash, typename ...Ts>
-    uint64_t 
-    hash_tuple(Hash fun, std::tuple<Ts...> const &tup, int bits)
+    //
+    // make_tuple: like make_tuple but possibly accepts a fewer number of arguments.
+    // Missing arguments are default constructed.
+    //
+
+    template <typename ...Ts>
+    inline std::tuple<Ts...>
+    make_tuple()
     {
-        uint64_t h = 0;
- 
-        if ((bits * sizeof...(Ts)) > sizeof(h)*8)
-            throw std::runtime_error("hash_fold: too many hash values or hash size too large");
-
-        if (bits == 0)
-            throw std::runtime_error("hash_fold: hash component bits cannot be 0");
-
-        pds::tuple_foreach([&](auto &elem) {
-                h <<= bits;
-                h |= (fun(elem) & ((1 << bits)-1));
-        }, tup);
-
-        return h;
+        return std::make_tuple(Ts{}...);
     }
+
+    template <typename T, typename ...Ts, typename X, typename ...Xs>
+    inline std::tuple<T, Ts...>
+    make_tuple(X && x, Xs&& ... xs)
+    {
+        return std::tuple_cat(std::make_tuple(std::forward<X>(x)),
+                                   make_tuple<Ts...>(std::forward<Xs>(xs)...));
+    }
+
 
 } // namespace pds
 
