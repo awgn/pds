@@ -57,21 +57,107 @@ namespace pds {
 
                 ret <<= N;
                 ret |= (std::get<i>(hash_)(elem) & make_mask(N));
+
             }, value);
 
             return ret;
         }
 
-        template <size_t I, typename ...Ts>
-        auto partial(std::tuple<Ts...> const &value)
+        template <size_t J, typename Hv>
+        bool match_any(Hv value, std::vector<size_t> const &idx)
         {
-            return std::get<I>(hash_)(std::get<I>(value)) & make_mask(N);
+            auto h = value & make_mask(N);
+            for(auto i : idx)
+            {
+                if (h == ((i >> (N*J)) & make_mask(N)))
+                    return true;
+            }
+            return false;
         }
 
 
     private:
 
         std::tuple<Hs...> hash_;
+    };
+
+
+
+    template <size_t N, typename H>
+    struct FoldHash
+    {
+        FoldHash(H h = H())
+        : hash_(h)
+        { }
+
+        template <typename T>
+        auto operator()(T const &value) const
+        {
+            return hash_(value) & make_mask(N);
+        }
+
+    private:
+        H hash_;
+
+    };
+
+
+
+#if 0
+    //
+    // is_modular, is_modular_v
+    //
+
+    template <typename T>
+    struct is_modular
+    {
+        enum { value = false };
+    };
+
+    template <size_t N, typename ...Hs>
+    struct is_modular<ModularHash<N, Hs...>>
+    {
+        enum { value = true };
+    };
+
+    template <typename T>
+    constexpr bool is_modular_v = is_modular<T>::value;
+
+#endif
+
+    //
+    // cardinality 
+    //
+
+    template <typename T>
+    struct hash_cardinality
+    {
+        enum : size_t { value = 1 };
+    };
+    template <size_t N, typename ...Hs>
+    struct hash_cardinality<ModularHash<N, Hs...>>
+    {
+        enum : size_t { value = sizeof...(Hs) };
+    };
+
+    //
+    // codomain_size<Hash>
+    //
+
+    template <typename H>
+    struct hash_codomain_size
+    {
+        enum : size_t { value = sizeof(H{}(0)) * 8} ;
+    };
+    template <size_t N, typename H>
+    struct hash_codomain_size<FoldHash<N, H>>
+    {
+        enum : size_t { value = N };
+    };
+    template <size_t N, typename ...Hs>
+    struct hash_codomain_size<ModularHash<N, Hs...>>
+    {
+        enum : size_t { value = N* sizeof...(Hs) };
     };
 
 
