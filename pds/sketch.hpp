@@ -276,7 +276,6 @@ namespace pds {
             return *this;
         }
 
-    private:
 
         template <typename Tp, typename Fun, size_t ...N>
         bool continuation_(Tp const &elem, Fun action, std::index_sequence<N...>)
@@ -306,7 +305,6 @@ namespace pds {
 
         std::vector<std::vector<T>> data_;
         std::tuple<Hs...> hash_;
-
     };
 
     template <typename T, std::size_t W, typename ...Hs>
