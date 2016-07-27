@@ -126,16 +126,16 @@ namespace pds {
 #endif
 
     //
-    // cardinality 
+    // rank
     //
 
     template <typename T>
-    struct hash_cardinality
+    struct hash_rank
     {
         enum : size_t { value = 1 };
     };
     template <size_t N, typename ...Hs>
-    struct hash_cardinality<ModularHash<N, Hs...>>
+    struct hash_rank<ModularHash<N, Hs...>>
     {
         enum : size_t { value = sizeof...(Hs) };
     };

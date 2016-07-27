@@ -24,7 +24,7 @@ struct konst_hash
 
 struct hash1
 {
-    uint32_t operator()(uint32_t x) const
+    uint64_t operator()(uint64_t x) const
     {
         return x & (x >> 16) & 0xffff;
     }
@@ -33,7 +33,7 @@ struct hash1
 
 struct hash2
 {
-    uint32_t operator()(uint32_t x) const
+    uint64_t operator()(uint64_t x) const
     {
         return x & (x >> 13) & 0xffff;
     }
@@ -44,7 +44,8 @@ auto g = Group("Sketch")
 
     .Single("simple", []
     {
-        pds::sketch<int, 1024, std::hash<int>, std::hash<int> > sk;
+        pds::sketch<int, 1024, FoldHash<10, std::hash<int>>, 
+                               FoldHash<10, std::hash<int>> > sk;
 
         sk.foreach_bucket(10, [](int &ctr)
         {
@@ -57,7 +58,8 @@ auto g = Group("Sketch")
 
     .Single("hash", []
     {
-        pds::sketch<int, 1024, konst_hash, konst_hash> sk;
+        pds::sketch<int, 1024, FoldHash<10, konst_hash>, 
+                               FoldHash<10, konst_hash>> sk;
 
         sk.foreach_bucket(1, [](int &ctr)
         {
@@ -81,7 +83,7 @@ auto g = Group("Sketch")
 
     .Single("incr_decr", []
     {
-        pds::sketch<int, 1024, std::hash<int> > sk;
+        pds::sketch<int, 1024, FoldHash<10, std::hash<int>> > sk;
 
         sk.increment_buckets(11);
         Assert(sk.count(11), is_equal_to(1));
@@ -103,7 +105,7 @@ auto g = Group("Sketch")
 
     .Single("reset", []
     {
-        pds::sketch<int, 1024, std::hash<int> > sk;
+        pds::sketch<int, 1024, FoldHash<10, std::hash<int>> > sk;
 
         sk.increment_buckets(11);
         sk.increment_buckets(11);
@@ -116,7 +118,7 @@ auto g = Group("Sketch")
 
     .Single("for_all", []
     {
-        pds::sketch<int, 1024, std::hash<int> > sk;
+        pds::sketch<int, 1024, FoldHash<10, std::hash<int>> > sk;
 
         sk.forall([](int &n)
         {
@@ -132,13 +134,13 @@ auto g = Group("Sketch")
 
     .Single("size", []
     {
-        pds::sketch<int, 1024, std::hash<int> > s;
+        pds::sketch<int, 1024, FoldHash<10, std::hash<int>> > s;
         Assert(s.size() == std::make_pair<size_t, size_t>(1, 1024));
     })
 
     .Single("merge", []
     {
-        pds::sketch<uint32_t, 1024, std::hash<int> > s1, s2;
+        pds::sketch<uint32_t, 1024, FoldHash<10, std::hash<int>> > s1, s2;
 
         s1.increment_buckets(1);
         s2.increment_buckets(1);
@@ -154,7 +156,7 @@ auto g = Group("Sketch")
 
     .Single("k_ary_estimate", []
     {
-        pds::sketch<int32_t, 1024, std::hash<int> > s1;
+        pds::sketch<int32_t, 1024, FoldHash<10, std::hash<int>> > s1;
 
         s1.increment_buckets(1);
         s1.increment_buckets(1);
@@ -173,7 +175,7 @@ auto g = Group("Sketch")
 
     .Single("filter", []
     {
-        pds::sketch<uint32_t, 1024, std::hash<int> > s;
+        pds::sketch<uint32_t, 1024, FoldHash<10, std::hash<int>> > s;
 
         s.increment_buckets(1);
 
@@ -222,9 +224,9 @@ auto g = Group("Sketch")
 
     .Single("large_filter", []
     {
-        pds::sketch<uint32_t, 65535, std::hash<uint32_t>,
-                                     hash1,
-                                     hash2> ips;
+        pds::sketch<uint32_t, 65536, FoldHash<16, std::hash<uint32_t>>,
+                                     FoldHash<16, hash1>,
+                                     FoldHash<16, hash2>> ips;
 
         ips.increment_buckets(0xff114200);
         ips.increment_buckets(0xffffff00);
@@ -253,7 +255,14 @@ auto g = Group("Sketch")
 
 
     })
-    
+    .Single("compile-time error", []
+    {
+        // using Hash1 = pds::sketch<uint32_t, 1024, std::hash<uint32_t>, pds::ModularHash<64, std::hash<uint32_t>, std::hash<uint32_t>> >;
+        // Hash1 x;
+
+        // using Hash2 = pds::sketch<uint32_t, 1024, std::hash<uint32_t>, pds::FoldHash<32, std::hash<uint32_t>> >;
+        // Hash2 x;
+    })
     ;
 
 

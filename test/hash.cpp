@@ -23,17 +23,17 @@ auto g = Group("Hash")
 
     })
     
-    .Single("cardinality", []
+    .Single("rank", []
     {
         using Hash8  = pds::ModularHash<8, std::hash<int>>;
         using Hash16 = pds::ModularHash<8, std::hash<int>, std::hash<int>>;
         using Hash5  = pds::FoldHash<5, std::hash<int>>;
 
-        Assert(pds::hash_cardinality<std::hash<char>>::value, is_equal_to(1));
-        Assert(pds::hash_cardinality<std::hash<int>>::value , is_equal_to(1));
-        Assert(pds::hash_cardinality<Hash5>::value          , is_equal_to(1));
-        Assert(pds::hash_cardinality<Hash8>::value          , is_equal_to(1));
-        Assert(pds::hash_cardinality<Hash16>::value         , is_equal_to(2));
+        Assert(pds::hash_rank<std::hash<char>>::value, is_equal_to(1));
+        Assert(pds::hash_rank<std::hash<int>>::value , is_equal_to(1));
+        Assert(pds::hash_rank<Hash5>::value          , is_equal_to(1));
+        Assert(pds::hash_rank<Hash8>::value          , is_equal_to(1));
+        Assert(pds::hash_rank<Hash16>::value         , is_equal_to(2));
 
     })
 

@@ -28,6 +28,7 @@
 
 #include <pds/utility.hpp>
 #include <pds/tuple.hpp>
+#include <pds/hash.hpp>
 
 #include <cstddef>
 #include <utility>
@@ -41,6 +42,26 @@
 namespace pds {
 
     //
+    // utility meta-functions...
+    //
+    
+    namespace details
+    {
+        template <template <typename...> class Fun, typename ...Hs> struct hash_coherence;
+
+        template <template <typename ...> class Fun, typename H> 
+        struct hash_coherence<Fun, H>
+        {
+            enum { value = true };
+        };
+        template <template <typename ...> class Fun, typename H1, typename H2, typename ...Hs> 
+        struct hash_coherence<Fun, H1, H2, Hs...>
+        {
+            enum { value = (Fun<H1>::value == Fun<H2>::value) && hash_coherence<Fun, H2, Hs...>::value };
+        };
+    } 
+
+    //
     // Sketch data structure:
     //
     // Cormode, Graham (2009). "Count-min sketch" (PDF). Encyclopedia of Database Systems. Springer. pp. 511–516.
@@ -48,7 +69,12 @@ namespace pds {
 
     template <typename T, std::size_t W, typename ...Hs>
     struct sketch
-    {
+    {   
+        static_assert(details::hash_coherence<pds::hash_rank, Hs...>::value,          "Sketch: all hash functions must have the same rank (number of hash component)!");
+        static_assert(details::hash_coherence<pds::hash_codomain_size, Hs...>::value, "Sketch: all hash functions must have the same co-domain size!");
+
+        static_assert((1ULL << pds::hash_codomain_size<typename std::tuple_element<0, std::tuple<Hs...>>::type>::value) == W, "Sketch: W and co-domain size mismatch!");
+
         template <typename ...Xs>
         sketch(Xs ... xs)
         : data_(sizeof...(Hs), std::vector<T>(W))
