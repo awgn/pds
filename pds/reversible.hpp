@@ -110,5 +110,36 @@ namespace pds {
         return ret;
     }
 
+    
+    namespace detail {
+
+        template < typename Sketch
+                 , typename ... Ranges
+                 , size_t ... I>
+        auto all_candidates( Sketch const &sketch
+                           , std::tuple<Ranges...> const &words
+                           , std::vector<std::vector<size_t>> const &buckets
+                           , std::index_sequence<I...>)
+        {
+            return std::make_tuple(
+                    pds::candidates<I>( sketch
+                                      , std::get<I>(words)
+                                      , buckets)...);
+        }
+
+    } // namespace detail
+
+    template < typename Sketch
+             , typename ... Ranges>
+    auto all_candidates( Sketch const &sketch
+                       , std::tuple<Ranges...> const &words
+                       , std::vector<std::vector<size_t>> const &buckets)
+    {
+        return detail::all_candidates( sketch
+                                     , words
+                                     , buckets
+                                     , std::make_index_sequence<sizeof...(Ranges)>{});
+    }                    
+
 
 } // namespace pds

@@ -77,7 +77,7 @@ namespace pds {
             (void)sink;
         }
         
-   }
+    }
     
     //
     // index_tuple: create indexes for a tuple
