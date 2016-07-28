@@ -64,15 +64,19 @@ namespace pds {
         }
 
         template <size_t J, typename HashValue>
-        bool match_any(HashValue value, std::vector<size_t> const &idx) const
+        std::vector<size_t>
+        sub_match(HashValue value, std::vector<size_t> const &idx) const
         {
+            std::vector<size_t> ret;
+
             auto h = value & make_mask(N);
             for(auto i : idx)
             {
                 if (h == ((i >> (N*J)) & make_mask(N)))
-                    return true;
+                    ret.push_back(i);
             }
-            return false;
+
+            return ret;
         }
 
 
