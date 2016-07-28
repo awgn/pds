@@ -30,19 +30,45 @@
 #include <pds/hash.hpp>
 
 #include <vector>
+#include <tuple>
+#include <iostream>
+
 
 namespace pds {
 
     //
-    // Reversible: algorithm to reverse a sketch defined with modular hash functions.
+    // Reversible: algorithm to reverse a sketch defined atop modular hash functions.
     //
 
 
     template <typename T>
     struct candidate
-    {
+    {   
+        candidate(T n = T{}, std::vector<std::vector<size_t>> ids = {})
+        : value(n)
+        , indices(std::move(ids))
+        { }
+
+
         T value;
+        std::vector<std::vector<size_t>> indices;
     };
+
+
+    template <typename CharT, typename Traits, typename T>
+    typename std::basic_ostream<CharT, Traits> &
+    operator<<(std::basic_ostream<CharT,Traits>& out, candidate<T> const& c)
+    {
+        out << "{ w:" << c.value << " idx:[ ";
+        for(auto i : c.indices)
+        {
+            out << "[";
+            for(auto j : i)
+                out << j << ' ';
+            out << "]";
+        }
+        return out << "] }"; 
+    }
 
 
     template < size_t J
@@ -54,17 +80,20 @@ namespace pds {
     {
         std::vector<candidate<typename Range::value_type>> ret;
 
-        for(auto &word: words)
+        for(auto const &word: words)
         {
             size_t i = 0;
+            std::vector<std::vector<size_t>> total_indices;
 
             pds::tuple_continue([&](auto &hash) { // row
 
-                auto & hf = std::get<J>(hash);
-                auto & bi = buckets[i]; 
+                auto & hf = hash.template sub_hash<J>();
+                auto & bidx = buckets[i]; 
 
-                if (hash.match_any(hf(word), bi)) {
+                auto indices = hash.template sub_match<J>(hf(word), bidx);
+                if (!indices.empty()) {
                     i++;
+                    total_indices.push_back(std::move(indices));
                     return true;
                 }
 
@@ -72,6 +101,10 @@ namespace pds {
 
             }, sketch.hash_);
 
+            auto ts = std::tuple_size<decltype(sketch.hash_)>();
+            if (i == ts)  {
+                ret.emplace_back(static_cast<typename Range::value_type>(word), std::move(total_indices));
+            }
         }
 
         return ret;
