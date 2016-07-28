@@ -135,6 +135,25 @@ namespace pds {
                                    make_tuple<Ts...>(std::forward<Xs>(xs)...));
     }
 
+    // 
+    // tuple is streamable...
+    //
+
+    template <typename CharT, typename Traits, typename ...Ts>
+    typename std::basic_ostream<CharT, Traits> &
+    operator<<(std::basic_ostream<CharT,Traits>& out, std::tuple<Ts...> const& tup)
+    {
+        size_t n = 0;
+        out << '(';
+        tuple_foreach([&](auto &elem) {
+            out << elem;
+            if (++n < sizeof...(Ts))
+                out << ' ';
+        }, tup);
+
+        return out << ')';
+    }
+
 
 } // namespace pds
 
