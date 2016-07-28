@@ -63,8 +63,8 @@ namespace pds {
             return ret;
         }
 
-        template <size_t J, typename Hv>
-        bool match_any(Hv value, std::vector<size_t> const &idx)
+        template <size_t J, typename HashValue>
+        bool match_any(HashValue value, std::vector<size_t> const &idx) const
         {
             auto h = value & make_mask(N);
             for(auto i : idx)
@@ -75,6 +75,13 @@ namespace pds {
             return false;
         }
 
+
+        template <size_t I>
+        decltype(auto) 
+        sub_hash() const
+        {
+            return std::get<I>(hash_);
+        }
 
     private:
 

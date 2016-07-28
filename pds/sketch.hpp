@@ -57,7 +57,8 @@ namespace pds {
         template <template <typename ...> class Fun, typename H1, typename H2, typename ...Hs> 
         struct hash_coherence<Fun, H1, H2, Hs...>
         {
-            enum { value = (Fun<H1>::value == Fun<H2>::value) && hash_coherence<Fun, H2, Hs...>::value };
+            enum { value = (static_cast<size_t>(Fun<H1>::value) == 
+                            static_cast<size_t>(Fun<H2>::value)) && hash_coherence<Fun, H2, Hs...>::value };
         };
     } 
 
