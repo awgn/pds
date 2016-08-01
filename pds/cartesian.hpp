@@ -95,8 +95,7 @@ namespace pds {
 
 
     template <typename ...Ts>
-    std::vector<std::tuple<Ts...>>
-    cartesian_product(std::tuple<std::vector<Ts>...> const &in)
+    auto cartesian_product(std::tuple<std::vector<Ts>...> const &in)
     {
         std::vector<std::tuple<Ts...>> ret;
 
@@ -118,5 +117,20 @@ namespace pds {
 
         return ret;
     }
+
+    template <typename ...Ts>
+    auto unpacked_cartesian_product(std::tuple<std::vector<Ts>...> const &in)
+    {
+        auto p = cartesian_product(in);
+
+        std::vector<decltype(pds::make_flat_tuple(p.front()))> ret;
+        ret.reserve(p.size());
+
+        for(auto &elem : p)
+            ret.push_back(pds::make_flat_tuple(elem));
+
+        return ret;
+    }
+
 
 } // pds
