@@ -27,7 +27,7 @@
 #pragma once
 
 #include <pds/sketch.hpp>
-#include <pds/candidate.hpp>
+#include <pds/annotated.hpp>
 #include <pds/hash.hpp>
 #include <pds/tuple.hpp>
 
@@ -45,7 +45,7 @@ namespace pds {
                    , Range const &words
                    , std::vector<std::vector<size_t>> const &buckets)
     {
-        std::vector<candidate<typename Range::value_type>> ret;
+        std::vector<annotated<typename Range::value_type>> ret;
 
         for(auto const &word: words)
         {

@@ -39,9 +39,7 @@ auto g = Group("Cartesian")
         {
              std::cout << x << std::endl;
         }
-
     });
-
 
 
 

@@ -42,13 +42,13 @@ namespace pds {
     using namespace std::experimental;
 
     //
-    // Reversible: algorithm to reverse a sketch defined atop modular hash functions.
+    // annotated types... 
     //
 
     template <typename T>
-    struct candidate
+    struct annotated
     {   
-        candidate(T n = T{}, std::vector<std::vector<size_t>> ids = {})
+        annotated(T n = T{}, std::vector<std::vector<size_t>> ids = {})
         : value(n)
         , indices(std::move(ids))
         { }
@@ -61,14 +61,14 @@ namespace pds {
     template <typename T>
     auto make_candidate(T const &value, std::vector<std::vector<size_t>> ids = {})
     {
-        return candidate<T>(value, std::move(ids));
+        return annotated<T>(value, std::move(ids));
     }
 
 
     template <typename T1, typename T2>
-    optional<pds::candidate<decltype(pds::cat(std::declval<T1>(), std::declval<T2>()))>>
-    merge_candidates(pds::candidate<T1> const &c1, 
-                     pds::candidate<T2> const &c2, size_t tolerance = 0)
+    optional<pds::annotated<decltype(pds::cat(std::declval<T1>(), std::declval<T2>()))>>
+    merge_candidates(pds::annotated<T1> const &c1, 
+                     pds::annotated<T2> const &c2, size_t tolerance = 0)
     {
         std::vector<std::vector<size_t>> ids;
 
@@ -99,7 +99,7 @@ namespace pds {
 
     template <typename CharT, typename Traits, typename T>
     typename std::basic_ostream<CharT, Traits> &
-    operator<<(std::basic_ostream<CharT,Traits>& out, candidate<T> const& c)
+    operator<<(std::basic_ostream<CharT,Traits>& out, annotated<T> const& c)
     {
         out << "{ w:" << c.value << " idx:[ ";
         for(auto i : c.indices)
