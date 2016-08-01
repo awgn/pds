@@ -54,7 +54,35 @@ auto g = Group("Tuple")
 
         std::cout << std::endl;
     })
-    
+ 
+    .Single("tuple_tail", []
+    {
+        auto t1 = std::make_tuple(0);
+        auto t2 = std::make_tuple(0, 'a');
+        auto t3 = std::make_tuple(0, 'a', 1.2);
+
+        std::cout << pds::tail(t1) << std::endl; 
+        std::cout << pds::tail(t2) << std::endl; 
+        std::cout << pds::tail(t3) << std::endl; 
+    })
+   
+    .Single("make_flat_tuple", []
+    {
+        auto t0 = std::make_tuple(0);
+        auto t1 = std::make_tuple(0,1);
+        auto t2 = std::make_tuple(std::make_tuple(0), 9);
+        auto t3 = std::make_tuple(std::make_tuple(0), 1, 9);
+        auto t4 = std::make_tuple(0, std::make_tuple(1), 9);
+        auto t5 = std::make_tuple(std::make_tuple(0), std::make_tuple(1), 9);
+
+        std::cout << pds::make_flat_tuple(t0) << std::endl; 
+        std::cout << pds::make_flat_tuple(t1) << std::endl; 
+        std::cout << pds::make_flat_tuple(t2) << std::endl; 
+        std::cout << pds::make_flat_tuple(t3) << std::endl; 
+        std::cout << pds::make_flat_tuple(t4) << std::endl; 
+        std::cout << pds::make_flat_tuple(t5) << std::endl; 
+
+    })
     .Single("continue", []
     {
         auto t = std::make_tuple<int, int, int>(1,2,3);
@@ -71,7 +99,6 @@ auto g = Group("Tuple")
     })
 
     ;
-
 
 
 int

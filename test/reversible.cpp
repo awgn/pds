@@ -23,6 +23,29 @@ struct id
 
 auto g = Group("Reversible")
 
+    .Single("merge_candidates", []
+    {
+        auto c1 = pds::make_candidate(150, { std::vector<size_t>{2,5}, 
+                                             std::vector<size_t>{1},
+                                             std::vector<size_t>{1,4,9},
+                                             std::vector<size_t>{1,3,6},
+                                             std::vector<size_t>{3} });
+
+        auto c2 = pds::make_candidate(72, { std::vector<size_t>{1, 2}, 
+                                            std::vector<size_t>{1, 5},
+                                            std::vector<size_t>{4,9},
+                                            std::vector<size_t>{5},
+                                            std::vector<size_t>{3,7,8} });
+
+
+        auto m = pds::merge_candidates(c1, c2, 1);
+        if (m)
+            std::cout << *m << std::endl;
+        else
+            std::cout << "nullopt!" << std::endl;
+    })
+
+
     .Single("sketch_basic", []
     {
         pds::sketch< int
