@@ -27,49 +27,16 @@
 #pragma once
 
 #include <pds/sketch.hpp>
+#include <pds/candidate.hpp>
 #include <pds/hash.hpp>
+#include <pds/tuple.hpp>
 
 #include <vector>
 #include <tuple>
 #include <iostream>
-
+#include <algorithm>
 
 namespace pds {
-
-    //
-    // Reversible: algorithm to reverse a sketch defined atop modular hash functions.
-    //
-
-
-    template <typename T>
-    struct candidate
-    {   
-        candidate(T n = T{}, std::vector<std::vector<size_t>> ids = {})
-        : value(n)
-        , indices(std::move(ids))
-        { }
-
-
-        T value;
-        std::vector<std::vector<size_t>> indices;
-    };
-
-
-    template <typename CharT, typename Traits, typename T>
-    typename std::basic_ostream<CharT, Traits> &
-    operator<<(std::basic_ostream<CharT,Traits>& out, candidate<T> const& c)
-    {
-        out << "{ w:" << c.value << " idx:[ ";
-        for(auto i : c.indices)
-        {
-            out << "[";
-            for(auto j : i)
-                out << j << ' ';
-            out << "]";
-        }
-        return out << "] }"; 
-    }
-
 
     template < size_t J
              , typename Sketch
