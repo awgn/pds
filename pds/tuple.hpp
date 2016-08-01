@@ -44,6 +44,7 @@ namespace pds {
         {
             std::initializer_list<bool> sink {(fun(std::get<N>(std::forward<TupleT>(tup))), true)...};
             (void)sink;
+            (void)fun;
         }
         
         template <typename Fun, typename TupleT, size_t ...N>
@@ -51,6 +52,7 @@ namespace pds {
         {
             std::initializer_list<bool> sink {(fun(std::integral_constant<size_t,N>{}, std::get<N>(std::forward<TupleT>(tup))), true)...};
             (void)sink;
+            (void)fun;
         }
         
         template <typename Fun, typename TupleT, size_t ...N>
@@ -115,6 +117,84 @@ namespace pds {
         return details::tuple_continue_index(fun, std::forward<TupleT>(tup), index_tuple<TupleT>{});
     }
     
+    // 
+    // tail tuple...
+    //
+
+    template <typename T>
+    auto tail(std::tuple<T> const &)
+    {
+        return std::tuple<>{};
+    }
+    template <typename T, typename ...Ts>
+    auto tail(std::tuple<T, Ts...> const &t)
+    {
+        std::tuple<Ts...> ret;
+
+        tuple_foreach_index([&](auto Idx, auto &ret_i) {
+            size_t constexpr const I = decltype(Idx)::value;
+            ret_i = std::get<I+1>(t);
+        }, ret);
+
+        return ret;
+    }
+    
+    //
+    // generic cat tuples...
+    //
+        
+    template <typename T1, typename T2>
+    auto cat(T1 const &t1, T2 const &t2)
+    {
+        return std::make_tuple(t1,t2);
+    }
+
+    template <typename ...T1, typename T2>
+    auto cat(std::tuple<T1...> const &t1, T2 const &t2)
+    {
+        return std::tuple_cat(t1, std::make_tuple(t2));
+    }
+
+    template <typename T1, typename ...T2>
+    auto cat(T1 const &t1, std::tuple<T2...> const &t2)
+    {
+        return std::tuple_cat(std::make_tuple(t1), t2);
+    }
+    template <typename ...T1, typename ...T2>
+    auto cat(std::tuple<T1...> const &t1, std::tuple<T2...> const &t2)
+    {
+        return std::tuple_cat(t1,t2);
+    }
+        
+    //
+    // make_flat_tuple
+    //
+    
+    inline auto make_flat_tuple(std::tuple<> const &)
+    {
+        return std::tuple<>{};      
+    }
+    template <typename T, typename ...Ts>
+    inline auto make_flat_tuple(std::tuple<T, Ts...> const &t)
+    {
+        return cat(std::get<0>(t), make_flat_tuple(tail(t)));
+    }
+
+    //
+    // is_tuple trait
+    //
+
+    template <typename T>
+    struct is_tuple
+    {
+        enum { value = false };
+    };
+    template <typename ...Ts>
+    struct is_tuple<std::tuple<Ts...>>
+    {
+        enum { value = true };
+    };
+
     //
     // make_tuple: like make_tuple but possibly accepts a fewer number of arguments.
     // Missing arguments are default constructed.
@@ -135,6 +215,11 @@ namespace pds {
                                    make_tuple<Ts...>(std::forward<Xs>(xs)...));
     }
 
+} // namespace pds
+
+
+namespace std
+{
     // 
     // tuple is streamable...
     //
@@ -145,7 +230,7 @@ namespace pds {
     {
         size_t n = 0;
         out << '(';
-        tuple_foreach([&](auto &elem) {
+        pds::tuple_foreach([&](auto &elem) {
             out << elem;
             if (++n < sizeof...(Ts))
                 out << ' ';
@@ -153,8 +238,6 @@ namespace pds {
 
         return out << ')';
     }
-
-
-} // namespace pds
+}
 
 
