@@ -54,6 +54,29 @@ auto g = Group("Tuple")
 
         std::cout << std::endl;
     })
+    
+    .Single("fold", []
+    {
+        auto t = std::make_tuple<int, int, double>(1,2,3.1);
+
+        auto x = pds::tuple_fold([](auto a, auto b) {
+                                    return a+b;
+                                 }, 0.0, t);
+
+        std::cout << x << std::endl;
+    })
+    
+    .Single("fold1", []
+    {
+        auto t = std::make_tuple<int, int, double>(1,2,3.1);
+
+        auto x = pds::tuple_fold1([](auto a, auto b) {
+                                    return a+b;
+                                 }, t);
+
+        std::cout << x << std::endl;
+    })
+ 
  
     .Single("tuple_tail", []
     {
@@ -61,9 +84,9 @@ auto g = Group("Tuple")
         auto t2 = std::make_tuple(0, 'a');
         auto t3 = std::make_tuple(0, 'a', 1.2);
 
-        std::cout << pds::tail(t1) << std::endl; 
-        std::cout << pds::tail(t2) << std::endl; 
-        std::cout << pds::tail(t3) << std::endl; 
+        std::cout << pds::tuple_tail(t1) << std::endl; 
+        std::cout << pds::tuple_tail(t2) << std::endl; 
+        std::cout << pds::tuple_tail(t3) << std::endl; 
     })
    
     .Single("make_flat_tuple", []

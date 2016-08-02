@@ -78,7 +78,22 @@ namespace pds {
             auto sink = {(cont(std::integral_constant<size_t,N>{}, std::get<N>(std::forward<TupleT>(tup))), true)...};
             (void)sink;
         }
+        
+        
+        template <typename Fun, typename T, typename TupleT, size_t N>
+        auto tuple_fold(Fun fun, T acc, TupleT &&tup, std::index_sequence<N>)
+        {
+            return  fun(std::move(acc), std::get<N>(tup));
+        }
+        template <typename Fun, typename T, typename TupleT, size_t N, size_t ...Ns>
+        auto tuple_fold(Fun fun, T acc, TupleT &&tup, std::index_sequence<N, Ns...>)
+        {
+            auto acc1 = fun(std::move(acc), std::get<N>(tup));
+            return tuple_fold(fun, std::move(acc1), std::forward<TupleT>(tup), std::index_sequence<Ns...>{}); 
+        }
     }
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////
     
     //
     // index_tuple: create indexes for a tuple
@@ -86,60 +101,27 @@ namespace pds {
 
     template <typename TupleT>
     using index_tuple = std::make_index_sequence<std::tuple_size<std::decay_t<TupleT>>::value>;
+    
+    template <typename TupleT>
+    using index_tuple_1 = std::make_index_sequence<std::tuple_size<std::decay_t<TupleT>>::value-1>;
 
     //
-    // tuple_foreach...
-    //
-    
-    template <typename Fun, typename TupleT>
-    void tuple_foreach(Fun fun, TupleT &&tup)
-    {
-        return details::tuple_foreach(fun, std::forward<TupleT>(tup), index_tuple<TupleT>{});
-    }
-    
-    template <typename Fun, typename TupleT>
-    void tuple_foreach_index(Fun fun, TupleT &&tup)
-    {
-        return details::tuple_foreach_index(fun, std::forward<TupleT>(tup), index_tuple<TupleT>{});
-    }
-    
-    
-    template <typename Fun, typename TupleT>
-    void tuple_continue(Fun fun, TupleT &&tup)
-    {
-        return details::tuple_continue(fun, std::forward<TupleT>(tup), index_tuple<TupleT>{});
-    }
-    
-    template <typename Fun, typename TupleT>
-    void tuple_continue_index(Fun fun, TupleT &&tup)
-    {
-        return details::tuple_continue_index(fun, std::forward<TupleT>(tup), index_tuple<TupleT>{});
-    }
-    
-    // 
-    // tail tuple...
+    // is_tuple trait
     //
 
     template <typename T>
-    auto tail(std::tuple<T> const &)
+    struct is_tuple
     {
-        return std::tuple<>{};
-    }
-    template <typename T, typename ...Ts>
-    auto tail(std::tuple<T, Ts...> const &t)
+        enum { value = false };
+    };
+    template <typename ...Ts>
+    struct is_tuple<std::tuple<Ts...>>
     {
-        std::tuple<Ts...> ret;
-
-        tuple_foreach_index([&](auto Idx, auto &ret_i) {
-            size_t constexpr const I = decltype(Idx)::value;
-            ret_i = std::get<I+1>(t);
-        }, ret);
-
-        return ret;
-    }
+        enum { value = true };
+    };
     
     //
-    // generic cat tuples...
+    // generic tuple_cat...
     //
         
     template <typename T1, typename T2>
@@ -165,38 +147,97 @@ namespace pds {
         return std::tuple_cat(t1,t2);
     }
 
+    //
+    // tuple_cat_type metafunction
+    //
+
+    template <typename ...Ts>
+    struct tuple_cat_type;
 
     template <typename T1, typename T2>
-    using tuple_cat_type_t = decltype(tuple_cat(std::declval<T1>(), std::declval<T2>())); 
+    struct tuple_cat_type<T1,T2>
+    {
+        using type = decltype(tuple_cat(std::declval<T1>(), std::declval<T2>())); 
+    };
+    template <typename T1, typename T2, typename ...Ts>
+    struct tuple_cat_type<T1,T2,Ts...>
+    {
+        using type = tuple_cat_type<
+                        typename tuple_cat_type<T1, T2>::type, Ts...>;
+    };
+
+    template <typename ...Ts>
+    using tuple_cat_type_t = typename tuple_cat_type<Ts...>::type;
 
     //
-    // make_flat_tuple
+    // tuple_foreach...
     //
     
-    inline auto make_flat_tuple(std::tuple<> const &)
+    template <typename Fun, typename TupleT>
+    void tuple_foreach(Fun fun, TupleT &&tup)
     {
-        return std::tuple<>{};      
+        return details::tuple_foreach(fun, std::forward<TupleT>(tup), index_tuple<TupleT>{});
     }
-    template <typename T, typename ...Ts>
-    inline auto make_flat_tuple(std::tuple<T, Ts...> const &t)
+    
+    template <typename Fun, typename TupleT>
+    void tuple_foreach_index(Fun fun, TupleT &&tup)
     {
-        return tuple_cat(std::get<0>(t), make_flat_tuple(tail(t)));
+        return details::tuple_foreach_index(fun, std::forward<TupleT>(tup), index_tuple<TupleT>{});
+    }
+    
+    //
+    // tuple_foreach...
+    //
+    
+    template <typename Fun, typename TupleT>
+    void tuple_continue(Fun fun, TupleT &&tup)
+    {
+        return details::tuple_continue(fun, std::forward<TupleT>(tup), index_tuple<TupleT>{});
+    }
+    
+    template <typename Fun, typename TupleT>
+    void tuple_continue_index(Fun fun, TupleT &&tup)
+    {
+        return details::tuple_continue_index(fun, std::forward<TupleT>(tup), index_tuple<TupleT>{});
     }
 
-    //
-    // is_tuple trait
+    // 
+    // tuple_tail...
     //
 
     template <typename T>
-    struct is_tuple
+    auto tuple_tail(std::tuple<T> const &)
     {
-        enum { value = false };
-    };
-    template <typename ...Ts>
-    struct is_tuple<std::tuple<Ts...>>
+        return std::tuple<>{};
+    }
+    template <typename T, typename ...Ts>
+    auto tuple_tail(std::tuple<T, Ts...> const &t)
     {
-        enum { value = true };
-    };
+        std::tuple<Ts...> ret;
+
+        tuple_foreach_index([&](auto Idx, auto &ret_i) {
+            size_t constexpr const I = decltype(Idx)::value;
+            ret_i = std::get<I+1>(t);
+        }, ret);
+
+        return ret;
+    }
+
+    // 
+    // tuple_fold...
+    //
+
+    template<typename Fun, typename T, typename TupleT> 
+    auto tuple_fold(Fun fun, T value, TupleT &&tup)
+    {
+        return details::tuple_fold(fun, std::move(value), std::forward<TupleT>(tup), index_tuple<TupleT>{});
+    }
+    
+    template<typename Fun, typename TupleT> 
+    auto tuple_fold1(Fun fun, TupleT &&tup)
+    {
+        return details::tuple_fold(fun, std::get<0>(tup), tuple_tail(tup), index_tuple_1<TupleT>{});
+    }
 
     //
     // make_tuple: like make_tuple but possibly accepts a fewer number of arguments.
@@ -216,6 +257,20 @@ namespace pds {
     {
         return std::tuple_cat(std::make_tuple(std::forward<X>(x)),
                                    make_tuple<Ts...>(std::forward<Xs>(xs)...));
+    }
+    
+    //
+    // make_flat_tuple
+    //
+    
+    inline auto make_flat_tuple(std::tuple<> const &)
+    {
+        return std::tuple<>{};      
+    }
+    template <typename T, typename ...Ts>
+    inline auto make_flat_tuple(std::tuple<T, Ts...> const &t)
+    {
+        return tuple_cat(std::get<0>(t), make_flat_tuple(tuple_tail(t)));
     }
 
 } // namespace pds
