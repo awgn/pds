@@ -31,6 +31,8 @@
 #include <vector>
 #include <algorithm>
 
+
+
 namespace pds {
 
     namespace details
@@ -94,8 +96,21 @@ namespace pds {
     } // namespace details
 
 
+    template <typename T1, typename T2>
+    auto cartesian_product(std::vector<T1> const &v1, std::vector<T2> const &v2)
+    {
+        std::vector<std::tuple<T1,T2>> vec;
+
+        for(auto &e1 : v1)
+            for(auto &e2 : v2)
+                vec.emplace_back(e1,e2);        
+
+        return vec;
+    }
+
+
     template <typename ...Ts>
-    auto cartesian_product(std::tuple<std::vector<Ts>...> const &in)
+    auto expand_cartesian_product(std::tuple<std::vector<Ts>...> const &in)
     {
         std::vector<std::tuple<Ts...>> ret;
 
@@ -119,7 +134,7 @@ namespace pds {
     }
 
     template <typename ...Ts>
-    auto unpacked_cartesian_product(std::tuple<std::vector<Ts>...> const &in)
+    auto unpack_cartesian_product(std::tuple<std::vector<Ts>...> const &in)
     {
         auto p = cartesian_product(in);
 
