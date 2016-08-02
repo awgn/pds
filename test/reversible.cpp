@@ -3,11 +3,12 @@
 #include "pds/range.hpp"
 #include "pds/cartesian.hpp"
 
-#include <cat/show.hpp>
+#include <cat/bits/type.hpp>
 
 #include <iostream>
 
 #include <yats.hpp>
+
 
 using namespace yats;
 
@@ -70,7 +71,7 @@ auto g = Group("Reversible")
                                      std::make_tuple(pds::numeric_range<int>(0, 255), 
                                                      pds::numeric_range<int>(0, 255)),
 
-                                    std::vector<std::vector<size_t>>{ 
+                                    std::vector<std::vector<size_t>> { 
                                           std::vector<size_t>{1, 8, 42, 30023}
                                         , std::vector<size_t>{1, 8, 42, 30023}
                                     });
@@ -83,10 +84,12 @@ auto g = Group("Reversible")
             std::cout << std::endl;
         }, r);
 
-        auto res = pds::expand_cartesian_product( r );
 
+        auto res = pds::expand_cartesian_product_by(r, pds::merge_annotated);
+
+        std::cout << std::endl;
         for(auto & t: res)
-             std::cout << "candidate => " << t << std::endl;
+            std::cout << "candidate => " << t << std::endl;
     })
     ;
 

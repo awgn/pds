@@ -111,7 +111,7 @@ namespace pds {
     // filter :: T1 -> T2 -> optional<T>   
     // 
 
-    template <typename T1, typename T2, typename Filt>
+    template <typename Filt, typename T1, typename T2>
     auto cartesian_product_by(std::vector<T1> const &v1, std::vector<T2> const &v2, Filt filter)
     {
         std::vector<std::decay_t<decltype(*(filter(std::declval<T1>(), std::declval<T2>())))>> vec;
@@ -122,44 +122,15 @@ namespace pds {
                     vec.push_back(std::move(*x));        
         return vec;
     }
+    
 
-
-    template <typename ...Ts>
-    auto expand_cartesian_product(std::tuple<std::vector<Ts>...> const &in)
+    template <typename Filt, typename ...Ts>
+    auto expand_cartesian_product_by(std::tuple<std::vector<Ts>...> const &vs, Filt filter)
     {
-        std::vector<std::tuple<Ts...>> ret;
-
-        auto lim = details::limits(in);
-
-        details::run_idx(lim, [&](std::vector<size_t> &idx) {
-
-                std::tuple<Ts...> elem;
-
-                tuple_foreach_index([&](auto Idx, auto &elem_i) { 
-
-                    size_t constexpr const I = decltype(Idx)::value;
-                    elem_i = std::get<I>(in)[idx[I]];
-
-                }, elem);
-
-                ret.push_back(std::move(elem));
-        });
-
-        return ret;
-    }
-
-    template <typename ...Ts>
-    auto unpack_cartesian_product(std::tuple<std::vector<Ts>...> const &in)
-    {
-        auto p = cartesian_product(in);
-
-        std::vector<decltype(pds::make_flat_tuple(p.front()))> ret;
-        ret.reserve(p.size());
-
-        for(auto &elem : p)
-            ret.push_back(pds::make_flat_tuple(elem));
-
-        return ret;
+        return tuple_fold1([&](auto const &v1, auto const &v2)
+               {
+                    return cartesian_product_by(v1, v2, filter); 
+               }, vs);
     }
 
 
