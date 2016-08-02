@@ -45,71 +45,30 @@ namespace pds {
     // annotated types... 
     //
 
-    template <typename T>
+    template <typename T, typename A>
     struct annotated
     {   
-        annotated(T n = T{}, std::vector<std::vector<size_t>> ids = {})
+        annotated(T n = T{}, A i = {})
         : value(n)
-        , indices(std::move(ids))
+        , info(std::move(i))
         { }
 
         T value;
-        std::vector<std::vector<size_t>> indices;
+        A info;
     };
 
-
-    template <typename T>
-    auto make_candidate(T const &value, std::vector<std::vector<size_t>> ids = {})
+    template <typename T, typename A>
+    auto annotate(T const &value, A info = {})
     {
-        return annotated<T>(value, std::move(ids));
+        return annotated<T, A>(value, std::move(info));
     }
 
-
-    template <typename T1, typename T2>
-    optional<pds::annotated<decltype(pds::cat(std::declval<T1>(), std::declval<T2>()))>>
-    merge_candidates(pds::annotated<T1> const &c1, 
-                     pds::annotated<T2> const &c2, size_t tolerance = 0)
-    {
-        std::vector<std::vector<size_t>> ids;
-
-        size_t null = 0;
-        for(size_t n = 0; n < c1.indices.size(); n++)
-        {
-            std::vector<size_t> v;
-
-            auto &v1 = c1.indices[n];
-            auto &v2 = c2.indices[n];
-
-            std::set_intersection(std::begin(v1), std::end(v1),
-                                  std::begin(v2), std::end(v2), 
-                                  std::back_inserter(v));
-
-            if (v.empty())
-                null++;
-
-            if (null > tolerance)
-                return nullopt;
-
-            ids.push_back(std::move(v));
-        }
-
-        return make_optional(make_candidate(pds::cat(c1.value, c2.value), ids));
-    }
-
-
-    template <typename CharT, typename Traits, typename T>
+    
+    template <typename CharT, typename Traits, typename T, typename A>
     typename std::basic_ostream<CharT, Traits> &
-    operator<<(std::basic_ostream<CharT,Traits>& out, annotated<T> const& c)
+    operator<<(std::basic_ostream<CharT,Traits>& out, annotated<T, A> const& c)
     {
-        out << "{ w:" << c.value << " idx:[ ";
-        for(auto i : c.indices)
-        {
-            out << "[";
-            for(auto j : i)
-                out << j << ' ';
-            out << "]";
-        }
-        return out << "] }"; 
+        return out << "{ value:" << c.value << " annotation: " << c.info << " }";
     }
 
 } // namespace pds

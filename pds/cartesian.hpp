@@ -43,7 +43,6 @@ namespace pds {
             return std::all_of(std::begin(idx), std::end(idx), [](size_t n) { return n == 0; });
         }
 
-
         inline void
         next_idx(std::vector<size_t> const &lim, 
                  std::vector<size_t> &idx)
@@ -105,6 +104,22 @@ namespace pds {
             for(auto &e2 : v2)
                 vec.emplace_back(e1,e2);        
 
+        return vec;
+    }
+
+    //
+    // filter :: T1 -> T2 -> optional<T>   
+    // 
+
+    template <typename T1, typename T2, typename Filt>
+    auto cartesian_product_by(std::vector<T1> const &v1, std::vector<T2> const &v2, Filt filter)
+    {
+        std::vector<std::decay_t<decltype(*(filter(std::declval<T1>(), std::declval<T2>())))>> vec;
+
+        for(auto &e1 : v1)
+            for(auto &e2 : v2)
+                if (auto x = filter(e1,e2))
+                    vec.push_back(std::move(*x));        
         return vec;
     }
 

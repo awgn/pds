@@ -35,8 +35,82 @@
 #include <tuple>
 #include <iostream>
 #include <algorithm>
+#include <sstream>
 
 namespace pds {
+    
+    using Indices = std::vector<std::vector<size_t>>;
+}
+
+
+namespace std {
+
+    template <typename CharT, typename Traits>
+    typename std::basic_ostream<CharT, Traits> &
+    operator<<(std::basic_ostream<CharT,Traits>& out, pds::Indices const& idx)
+    {
+        out << "[";
+        for(auto i : idx)
+        {
+            out << "[";
+            for(auto j : i)
+                out << j << ' ';
+            out << "]";
+        }
+        return out << "]";
+    }
+}
+
+
+namespace pds {
+
+    optional<Indices>
+    merge_indices(Indices const &i1, Indices const &i2, size_t tolerance = 0)
+    {
+        Indices ids;
+
+        size_t null = 0;
+        for(size_t n = 0; n < i1.size(); n++)
+        {
+            std::vector<size_t> v;
+
+            auto &v1 = i1.at(n);
+            auto &v2 = i2.at(n);
+
+            std::set_intersection(std::begin(v1), std::end(v1),
+                                  std::begin(v2), std::end(v2), 
+                                  std::back_inserter(v));
+
+            if (v.empty())
+                null++;
+
+            if (null > tolerance)
+                return nullopt;
+
+            ids.push_back(std::move(v));
+        }
+
+        return make_optional(ids);
+    }
+
+    
+    struct merge_annotated_
+    {
+        template <typename T1, typename T2, typename A>
+        auto operator()(pds::annotated<T1, A> const &c1,
+                        pds::annotated<T2, A> const &c2,
+                        size_t tolerance = 0) const
+        -> optional<pds::annotated<pds::cat_type_t<T1,T2>, A>>
+        {
+            auto ann = merge_indices(c1.info, c2.info, tolerance);
+            if (ann) 
+                return make_optional(annotate(pds::tuple_cat(c1.value, c2.value), *ann));
+            return nullopt;
+        }
+    };
+
+    auto constexpr merge_annotated = merge_annotated_{};
+
 
     template < size_t J
              , typename Sketch
@@ -45,7 +119,7 @@ namespace pds {
                    , Range const &words
                    , std::vector<std::vector<size_t>> const &buckets)
     {
-        std::vector<annotated<typename Range::value_type>> ret;
+        std::vector<annotated<typename Range::value_type, Indices>> ret;
 
         for(auto const &word: words)
         {

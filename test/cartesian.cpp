@@ -1,5 +1,7 @@
 #include "pds/cartesian.hpp"
 #include "pds/tuple.hpp"
+#include "pds/annotated.hpp"
+#include "pds/reversible.hpp"
 
 #include <string>
 #include <iostream>
@@ -7,40 +9,83 @@
 #include <yats.hpp>
 
 using namespace yats;
+using namespace pds;
 
 auto g = Group("Cartesian")
 
-    .Single("simple", []
+    .Single("cartesian_product", []
     {
-        auto p = std::make_tuple(std::vector<int>{1,2,3},
-                                 std::vector<std::string>{"hello", "world"});
+        std::vector<int>  v {1, 2, 3};
+        std::vector<char> c {'a','b'};
+        auto p = pds::cartesian_product(v,c);
+        for(auto & e : p)
+            std::cout << e << std::endl;
+    })
 
-        auto r = pds::cartesian_product(p);
-             
-        for(auto &x : r)
-        {
-            std::cout << x << std::endl;
-            // std::cout << std::get<0>(x) << ' ' << std::get<1>(x) << std::endl;
-        }
+    .Single("cartesian_product_by", []
+    {
+        std::vector<pds::annotated<int, Indices>> v1 = {
+                                             pds::annotate(150, Indices { std::vector<size_t>{2,5}, 
+                                                                                std::vector<size_t>{1}, }),
+                                             pds::annotate(47,  Indices { std::vector<size_t>{3}, 
+                                                                                std::vector<size_t>{5}, }),
+                                             pds::annotate(236, Indices { std::vector<size_t>{2}, 
+                                                                                std::vector<size_t>{2,3,7} })
+                                          };
+
+
+        std::vector<pds::annotated<int, Indices>> v2 = {
+                                             pds::annotate(72, Indices { std::vector<size_t>{1,2}, 
+                                                                               std::vector<size_t>{1,5}, }),
+                                             pds::annotate(104, Indices { std::vector<size_t>{1,2}, 
+                                                                                std::vector<size_t>{2,6}, }),
+                                          };
+
+        auto p = pds::cartesian_product_by(v1,v2, pds::merge_annotated); 
+
+        for(auto & e : p)
+            std::cout << e << std::endl;
 
     })
-    .Single("unpacked", []
+
+    .Single("cartesian+merge", []
     {
-        auto p = std::make_tuple(std::vector<int>{1,2,3},
-                                 std::vector<std::string>{"hello", "world"});
+        std::vector<pds::annotated<int, Indices>> v1 = {
+                                             pds::annotate(150, Indices { std::vector<size_t>{2,5}, 
+                                                                                std::vector<size_t>{1}, }),
+                                             pds::annotate(47,  Indices { std::vector<size_t>{3}, 
+                                                                                std::vector<size_t>{5}, }),
+                                             pds::annotate(236, Indices { std::vector<size_t>{2}, 
+                                                                                std::vector<size_t>{2,3,7} })
+                                          };
 
-        auto r = pds::unpacked_cartesian_product(p);
-             
-        auto p2 = std::make_tuple(r, std::vector<char>{'a', 'b'});
 
-        auto r2 = pds::unpacked_cartesian_product(p2);
+        std::vector<pds::annotated<int, Indices>> v2 = {
+                                             pds::annotate(72, Indices { std::vector<size_t>{1,2}, 
+                                                                               std::vector<size_t>{1,5}, }),
+                                             pds::annotate(104, Indices { std::vector<size_t>{1,2}, 
+                                                                                std::vector<size_t>{2,6}, }),
+                                          };
 
-        for(auto &x : r2)
-        {
-             std::cout << x << std::endl;
-        }
-    });
+        auto p = pds::cartesian_product_by(v1,v2, pds::merge_annotated);
 
+        std::vector<pds::annotated<int, Indices>> v3 = {
+                                             pds::annotate(182, Indices{ std::vector<size_t>{1,2 }, 
+                                                                               std::vector<size_t>{1}, }),
+                                             pds::annotate(32,  Indices { std::vector<size_t>{2}, 
+                                                                                std::vector<size_t>{1}, }),
+                                             pds::annotate(49,  Indices { std::vector<size_t>{2}, 
+                                                                                std::vector<size_t>{2, 6}, }),
+                                          };
+
+        auto p2 = pds::cartesian_product_by(p,v3, pds::merge_annotated);
+ 
+        for(auto & e : p2)
+            std::cout << e << std::endl;
+
+    })
+
+    ;
 
 
 int

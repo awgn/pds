@@ -144,28 +144,32 @@ namespace pds {
     //
         
     template <typename T1, typename T2>
-    auto cat(T1 const &t1, T2 const &t2)
+    auto tuple_cat(T1 const &t1, T2 const &t2)
     {
         return std::make_tuple(t1,t2);
     }
 
     template <typename ...T1, typename T2>
-    auto cat(std::tuple<T1...> const &t1, T2 const &t2)
+    auto tuple_cat(std::tuple<T1...> const &t1, T2 const &t2)
     {
         return std::tuple_cat(t1, std::make_tuple(t2));
     }
 
     template <typename T1, typename ...T2>
-    auto cat(T1 const &t1, std::tuple<T2...> const &t2)
+    auto tuple_cat(T1 const &t1, std::tuple<T2...> const &t2)
     {
         return std::tuple_cat(std::make_tuple(t1), t2);
     }
     template <typename ...T1, typename ...T2>
-    auto cat(std::tuple<T1...> const &t1, std::tuple<T2...> const &t2)
+    auto tuple_cat(std::tuple<T1...> const &t1, std::tuple<T2...> const &t2)
     {
         return std::tuple_cat(t1,t2);
     }
-        
+
+
+    template <typename T1, typename T2>
+    using cat_type_t = decltype(tuple_cat(std::declval<T1>(), std::declval<T2>())); 
+
     //
     // make_flat_tuple
     //
@@ -177,7 +181,7 @@ namespace pds {
     template <typename T, typename ...Ts>
     inline auto make_flat_tuple(std::tuple<T, Ts...> const &t)
     {
-        return cat(std::get<0>(t), make_flat_tuple(tail(t)));
+        return tuple_cat(std::get<0>(t), make_flat_tuple(tail(t)));
     }
 
     //

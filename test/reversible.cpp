@@ -53,9 +53,7 @@ auto g = Group("Reversible")
             std::cout << "r1: " << x << std::endl;
         }
 
-        auto res = pds::cartesian_product( 
-                        std::make_tuple(r0, r1)
-                   );
+        auto res = pds::cartesian_product(r0, r1); 
 
         for(auto & t: res)
             std::cout << "candidate => " << t << std::endl;
@@ -85,10 +83,10 @@ auto g = Group("Reversible")
             std::cout << std::endl;
         }, r);
 
-        auto res = pds::cartesian_product( r );
+        auto res = pds::expand_cartesian_product( r );
 
         for(auto & t: res)
-            std::cout << "candidate => " << t << std::endl;
+             std::cout << "candidate => " << t << std::endl;
     })
     ;
 
