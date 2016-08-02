@@ -3,8 +3,6 @@
 #include "pds/range.hpp"
 #include "pds/cartesian.hpp"
 
-#include <cat/show.hpp>
-
 #include <iostream>
 
 #include <yats.hpp>
