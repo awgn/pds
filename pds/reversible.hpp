@@ -100,7 +100,7 @@ namespace pds {
         auto operator()(pds::annotated<T1, A> const &c1,
                         pds::annotated<T2, A> const &c2,
                         size_t tolerance = 0) const
-        -> optional<pds::annotated<pds::cat_type_t<T1,T2>, A>>
+        -> optional<pds::annotated<pds::tuple_cat_type_t<T1,T2>, A>>
         {
             auto ann = merge_indices(c1.info, c2.info, tolerance);
             if (ann) 

@@ -78,7 +78,6 @@ namespace pds {
             auto sink = {(cont(std::integral_constant<size_t,N>{}, std::get<N>(std::forward<TupleT>(tup))), true)...};
             (void)sink;
         }
-        
     }
     
     //
@@ -168,7 +167,7 @@ namespace pds {
 
 
     template <typename T1, typename T2>
-    using cat_type_t = decltype(tuple_cat(std::declval<T1>(), std::declval<T2>())); 
+    using tuple_cat_type_t = decltype(tuple_cat(std::declval<T1>(), std::declval<T2>())); 
 
     //
     // make_flat_tuple
