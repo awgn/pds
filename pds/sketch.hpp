@@ -193,7 +193,6 @@ namespace pds {
             return ret;
         }
 
-
         //
         // filter the keys whose the given predicate holds for each
         // bucket
@@ -302,7 +301,6 @@ namespace pds {
             }
             return *this;
         }
-
 
         template <typename Tp, typename Fun, size_t ...N>
         bool continuation_(Tp const &elem, Fun action, std::index_sequence<N...>)

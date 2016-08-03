@@ -121,6 +121,8 @@ namespace pds {
     {
         std::vector<annotated<typename Range::value_type, Indices>> ret;
 
+        std::cout << "+ candidates component[" << J << "]..." << std::endl;
+
         for(auto const &word: words)
         {
             size_t i = 0;
