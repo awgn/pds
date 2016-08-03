@@ -171,5 +171,67 @@ namespace pds {
         enum : size_t { value = N* sizeof...(Hs) };
     };
 
+    //
+    // Hash functions...
+    // 
+
+    struct H1
+    {
+        template <typename T>
+        uint32_t operator()(T value) const
+        {
+            return static_cast<uint32_t>(value);
+        }
+    };
+
+    struct H2
+    {
+        template <typename T>
+        uint32_t operator()(T value) const
+        {
+            uint32_t x = static_cast<uint32_t>(value);
+            return x ^ (x >> 8)^ (x >> 16) ^ (x >> 24);
+        }
+    };
+
+    struct H3
+    {
+        template <typename T>
+        uint32_t operator()(T value) const
+        {
+            uint32_t x = static_cast<uint32_t>(value);
+            return x ^ (x >> 5)^ (x >> 11) ^ (x >> 23);
+        }
+    };
+    
+    struct H4
+    {
+        template <typename T>
+        uint32_t operator()(T value) const
+        {
+            uint32_t x = static_cast<uint32_t>(value);
+            return x ^ (x >> 9)^ (x >> 13) ^ (x >> 19);
+        }
+    };
+    
+    struct H5
+    {
+        template <typename T>
+        uint32_t operator()(T value) const
+        {
+            uint32_t x = static_cast<uint32_t>(value);
+            return x ^ (x >> 3)^ (x >> 11) ^ (x >> 22);
+        }
+    };
+
+    struct H6
+    {
+        template <typename T>
+        uint32_t operator()(T value) const
+        {
+            uint32_t x = static_cast<uint32_t>(value);
+            return x ^ (x >> 5)^ (x >> 15) ^ (x >> 20);
+        }
+    };
 
 } // namespace pds
