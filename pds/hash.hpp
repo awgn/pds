@@ -51,12 +51,10 @@ namespace pds {
 
             uint64_t ret = 0;
 
-            pds::tuple_foreach_index([&](auto I, auto &elem) 
+            pds::tuple_foreach_index([&](auto Idx, auto &elem) 
             {
-                constexpr auto i = decltype(I)::value;
-
-                ret <<= N;
-                ret |= (std::get<i>(hash_)(elem) & make_mask(N));
+                constexpr auto I = decltype(Idx)::value;
+                ret |= ((std::get<I>(hash_)(elem) & make_mask(N)) << (I * N));
 
             }, value);
 
@@ -111,8 +109,6 @@ namespace pds {
         H hash_;
 
     };
-
-
 
 #if 0
     //
