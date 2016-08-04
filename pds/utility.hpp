@@ -82,15 +82,6 @@ namespace pds {
         return value == 1 ? 0 : 1 + log2(value >> 1);
     }
 
-
-    //
-    // type_at: get N-type from a pack
-    //
-
-    template <size_t N, typename ...Ts>
-    using type_at = typename std::tuple_element<N, std::tuple<Ts...>>::type;
-
-
     //
     // make mask
     //
