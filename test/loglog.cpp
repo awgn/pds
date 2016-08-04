@@ -1,7 +1,9 @@
+#include "pds/hash.hpp"
 #include "pds/loglog.hpp"
 #include "pds/hyperloglog.hpp"
 
 #include <iostream>
+#include <random>
 
 #include <yats.hpp>
 
@@ -12,8 +14,6 @@ auto g = Group("LogLog")
 
     .Single("simple", []
     {
-        std::cout << "LogLog: " << std::endl;
-
         pds::loglog<std::string> llc;
 
         for(int n = 0; n < 10; n++)
@@ -35,8 +35,6 @@ auto h = Group("Hyper")
 
     .Single("simple", []
     {
-        std::cout << "HyperLogLog: " << std::endl;
-
         pds::hyperloglog<std::string> llc;
 
         for(int n = 0; n < 10; n++)
@@ -52,6 +50,20 @@ auto h = Group("Hyper")
         llc += llc;
 
         Assert( llc.cardinality(), is_equal_to(0));
+    })
+    
+    .Single("hashing", []
+    {
+        pds::hyperloglog<int, 16, pds::H2> llc;
+
+        std::mt19937 rand;
+
+        for(int n = 0; n < 10000; n++)
+        {
+            llc(rand());
+        }
+            
+        std::cout << llc.cardinality() << std::endl;
     })
     ;
 
