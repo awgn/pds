@@ -121,9 +121,7 @@ auto g = Group("Complete")
 
     .Single("hyperloglog", []
     {
-        pds::sketch< pds::hyperloglog< std::tuple<uint16_t, uint16_t>, 
-                                       1024, 
-                                       pds::ModularHash< bit_16(std::hash<uint16_t>), bit_16(std::hash<uint16_t>) > >
+        pds::sketch< pds::hyperloglog< std::tuple<uint16_t, uint16_t>, 128, std::hash<std::tuple<uint16_t, uint16_t>>>
                    , (1 << 12)
                    , pds::ModularHash<bit_3(H1), bit_3(H1), bit_3(H1), bit_3(H1)> 
                    , pds::ModularHash<bit_3(H2), bit_3(H2), bit_3(H2), bit_3(H2)> 
@@ -137,7 +135,7 @@ auto g = Group("Complete")
 
         for(int i = 0; i < 1000; i++)
         {
-            auto sport = 40000;
+            auto sport = rand();
             auto dport = i;
 
             s.foreach_bucket(std::make_tuple(0xbad,  0xbee,  0xdead, 0xbeef), [&](auto &hllc) {
@@ -151,7 +149,7 @@ auto g = Group("Complete")
 
         auto idx = s.index_buckets([](auto &b)
                                  {
-                                    return b.cardinality() > 1;
+                                    return b.cardinality() > 500;
                                  });
 
         std::cout << "idx: " << cat::show(idx) << std::endl;
