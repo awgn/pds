@@ -71,10 +71,9 @@ namespace pds {
     template <typename T, std::size_t W, typename ...Hs>
     struct sketch
     {   
-        static_assert(details::hash_coherence<pds::hash_rank, Hs...>::value,          "Sketch: all hash functions must have the same rank (number of hash component)!");
-        static_assert(details::hash_coherence<pds::hash_codomain_size, Hs...>::value, "Sketch: all hash functions must have the same co-domain size!");
-
-        static_assert((1ULL << pds::hash_codomain_size<typename std::tuple_element<0, std::tuple<Hs...>>::type>::value) == W, "Sketch: W and co-domain size mismatch!");
+        static_assert(details::hash_coherence<pds::hash_rank, Hs...>::value,        "Sketch: all hash functions must have the same rank (number of hash component)!");
+        static_assert(details::hash_coherence<pds::hash_bitsize, Hs...>::value,     "Sketch: all hash functions must have the same co-domain size!");
+        static_assert((1ULL << pds::hash_bitsize<type_at_t<0, Hs...>>::value) == W, "Sketch: W and co-domain size mismatch!");
 
         template <typename ...Xs>
         sketch(Xs ... xs)
