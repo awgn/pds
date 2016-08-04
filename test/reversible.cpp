@@ -9,6 +9,7 @@
 
 
 using namespace yats;
+using namespace pds;
 
 struct id
 {
@@ -26,8 +27,8 @@ auto g = Group("Reversible")
     {
         pds::sketch< int
                    , 65536
-                   , pds::ModularHash<8, std::hash<int>, std::hash<int>> 
-                   , pds::ModularHash<8, std::hash<int>, std::hash<int>> > s;
+                   , pds::ModularHash< bit_8(std::hash<int>), bit_8(std::hash<int>)> 
+                   , pds::ModularHash< bit_8(std::hash<int>), bit_8(std::hash<int>)>> s; 
 
 
         auto r0 = pds::candidates<0>(s, pds::numeric_range<int>(0, 255), 
@@ -62,8 +63,8 @@ auto g = Group("Reversible")
     {
         pds::sketch< int
                    , 65536
-                   , pds::ModularHash<8, std::hash<int>, std::hash<int>> 
-                   , pds::ModularHash<8, std::hash<int>, std::hash<int>> > s;
+                   , pds::ModularHash< bit_8(std::hash<int>), bit_8(std::hash<int>)> 
+                   , pds::ModularHash< bit_8(std::hash<int>), bit_8(std::hash<int>)> > s;
 
         auto r = pds::all_candidates(s, 
                                      std::make_tuple(pds::numeric_range<int>(0, 255), 

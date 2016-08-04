@@ -21,10 +21,10 @@ auto g = Group("Complete")
     {
         pds::sketch< uint16_t
                    , (1<<20)
-                   , pds::ModularHash<5, H1, H1, H1, H1> 
-                   , pds::ModularHash<5, H2, H2, H2, H2> 
-                   , pds::ModularHash<5, H3, H3, H3, H3> 
-                   , pds::ModularHash<5, H4, H4, H4, H4> 
+                   , pds::ModularHash< bit_5(H1), bit_5(H1), bit_5(H1), bit_5(H1)> 
+                   , pds::ModularHash< bit_5(H2), bit_5(H2), bit_5(H2), bit_5(H2)> 
+                   , pds::ModularHash< bit_5(H3), bit_5(H3), bit_5(H3), bit_5(H3)> 
+                   , pds::ModularHash< bit_5(H4), bit_5(H4), bit_5(H4), bit_5(H4)> 
                    > s;
 
         for(int i = 0; i < 1000; i++)
@@ -64,12 +64,12 @@ auto g = Group("Complete")
     {
         pds::sketch< uint16_t
                    , (1<< 21)
-                   , pds::ModularHash<3, H1, H1, H1, H1, H1, H1, H1> 
-                   , pds::ModularHash<3, H2, H2, H2, H2, H2, H2, H2> 
-                   , pds::ModularHash<3, H3, H3, H3, H3, H3, H3, H3> 
-                   , pds::ModularHash<3, H4, H4, H4, H4, H4, H4, H4> 
-                   , pds::ModularHash<3, H5, H5, H5, H5, H5, H5, H5> 
-                   , pds::ModularHash<3, H6, H6, H6, H6, H6, H6, H6> 
+                   , pds::ModularHash<bit_3(H1), bit_3(H1), bit_3(H1), bit_3(H1), bit_3(H1), bit_3(H1), bit_3(H1)> 
+                   , pds::ModularHash<bit_3(H2), bit_3(H2), bit_3(H2), bit_3(H2), bit_3(H2), bit_3(H2), bit_3(H2)> 
+                   , pds::ModularHash<bit_3(H3), bit_3(H3), bit_3(H3), bit_3(H3), bit_3(H3), bit_3(H3), bit_3(H3)> 
+                   , pds::ModularHash<bit_3(H4), bit_3(H4), bit_3(H4), bit_3(H4), bit_3(H4), bit_3(H4), bit_3(H4)> 
+                   , pds::ModularHash<bit_3(H5), bit_3(H5), bit_3(H5), bit_3(H5), bit_3(H5), bit_3(H5), bit_3(H5)> 
+                   , pds::ModularHash<bit_3(H6), bit_3(H6), bit_3(H6), bit_3(H6), bit_3(H6), bit_3(H6), bit_3(H6)> 
                    > s;
 
         for(int i = 0; i < 1000; i++)
@@ -114,7 +114,7 @@ auto g = Group("Complete")
         auto res = pds::expand_cartesian_product_by(r, pds::merge_annotated);
 
         for(auto & t: res)
-                std::cout << "candidate => " << t << std::endl;
+                std::cout << "candidate => " << t.value << std::endl;
     })
 
     ;
