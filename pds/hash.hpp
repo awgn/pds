@@ -271,4 +271,37 @@ namespace pds {
         }
     };
 
+    struct H7
+    {
+        template <typename T>
+        uint32_t operator()(T value) const
+        {
+            uint32_t x = static_cast<uint32_t>(value);
+            return x ^ (x << 5)^ (x << 13) ^ (x << 20);
+        }
+    };
+
 } // namespace pds
+
+
+
+namespace std
+{
+    template <typename ...Ts>
+    struct hash<std::tuple<Ts...>>
+    {
+        uint64_t operator()(std::tuple<Ts...> const &t) const
+        {
+            uint64_t ret = 0;
+
+            pds::tuple_foreach([&](auto const &elem)
+            {
+                auto h = std::hash<std::decay_t<decltype(elem)>>{};
+                ret ^= h(elem);
+            }, t);
+
+            return ret;
+        }
+    };
+
+}
