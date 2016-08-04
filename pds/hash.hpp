@@ -27,6 +27,7 @@
 #pragma once 
 
 #include <pds/tuple.hpp>
+#include <pds/type_traits.hpp>
 #include <pds/utility.hpp>
 
 #include <functional>
@@ -34,9 +35,17 @@
 
 namespace pds {
 
-    template <size_t N, typename ...Hs>
+    
+    template <typename T>                           struct hash_bitsize;
+    template <typename ...Ts>                       struct hash_total_bitsize;
+    template <size_t N, typename H, typename ...Hs> struct hash_offset;
+
+
+    template <typename ...Hs> 
     struct ModularHash
     {
+        constexpr static size_t total_size = hash_total_bitsize<Hs...>::value;
+        
         template <typename ...Xs>
         ModularHash(Xs...xs)
         : hash_(pds::make_tuple<Hs...>(xs...))
@@ -44,17 +53,16 @@ namespace pds {
 
 
         template <typename ...Ts>
-        auto 
-        operator()(std::tuple<Ts...> const &value) const
+        auto operator()(std::tuple<Ts...> const &value) const
         {
-            static_assert(sizeof...(Ts)* N <= 64, "ModularHash: too many components/hash too large (max. 64bit)");
+            static_assert(total_size <= 64, "ModularHash: too many components/hash too large (max. 64bit)");
 
             uint64_t ret = 0;
 
             pds::tuple_foreach_index([&](auto Idx, auto &elem) 
             {
                 constexpr auto I = decltype(Idx)::value;
-                ret |= ((std::get<I>(hash_)(elem) & make_mask(N)) << (I * N));
+                ret |= ((std::get<I>(hash_)(elem) & make_mask(hash_bitsize<type_at_t<I, Hs...>>::value)) << (hash_offset<I, Hs...>::value));
 
             }, value);
 
@@ -67,10 +75,10 @@ namespace pds {
         {
             std::vector<size_t> ret;
 
-            auto h = value & make_mask(N);
+            auto h = value & make_mask(hash_bitsize<type_at_t<J, Hs...>>::value);
             for(auto i : idx)
             {
-                if (h == ((i >> (N*J)) & make_mask(N)))
+                if (h == ((i >> (hash_offset<J, Hs...>::value)) & make_mask(hash_bitsize<type_at_t<J, Hs...>>::value)))
                     ret.push_back(i);
             }
 
@@ -91,12 +99,17 @@ namespace pds {
     };
 
 
-
-    template <size_t N, typename H>
-    struct FoldHash
+    //
+    // fold a hash function to the number of bit:
+    //
+    // e.g.: HashFold<5, MyHashFunction>
+    //
+    
+    template <size_t N, typename Hash>
+    struct HashFold
     {
-        FoldHash(H h = H())
-        : hash_(h)
+        HashFold(Hash h = Hash())
+        : hash_(std::move(h))
         { }
 
         template <typename T>
@@ -106,34 +119,28 @@ namespace pds {
         }
 
     private:
-        H hash_;
-
+        Hash hash_;
     };
 
-#if 0
-    //
-    // is_modular, is_modular_v
-    //
-
-    template <typename T>
-    struct is_modular
-    {
-        enum { value = false };
-    };
-
-    template <size_t N, typename ...Hs>
-    struct is_modular<ModularHash<N, Hs...>>
-    {
-        enum { value = true };
-    };
-
-    template <typename T>
-    constexpr bool is_modular_v = is_modular<T>::value;
-
-#endif
+    #define bit_1(x)  pds::HashFold<1,x>
+    #define bit_2(x)  pds::HashFold<2,x>
+    #define bit_3(x)  pds::HashFold<3,x>
+    #define bit_4(x)  pds::HashFold<4,x>
+    #define bit_5(x)  pds::HashFold<5,x>
+    #define bit_6(x)  pds::HashFold<6,x>
+    #define bit_7(x)  pds::HashFold<7,x>
+    #define bit_8(x)  pds::HashFold<8,x>
+    #define bit_9(x)  pds::HashFold<9,x>
+    #define bit_10(x) pds::HashFold<10,x>
+    #define bit_11(x) pds::HashFold<11,x>
+    #define bit_12(x) pds::HashFold<12,x>
+    #define bit_13(x) pds::HashFold<13,x>
+    #define bit_14(x) pds::HashFold<14,x>
+    #define bit_15(x) pds::HashFold<15,x>
+    #define bit_16(x) pds::HashFold<16,x>
 
     //
-    // rank
+    // hash_rank
     //
 
     template <typename T>
@@ -141,34 +148,68 @@ namespace pds {
     {
         enum : size_t { value = 1 };
     };
-    template <size_t N, typename ...Hs>
-    struct hash_rank<ModularHash<N, Hs...>>
+    template <typename ...Hs>
+    struct hash_rank<ModularHash<Hs...>>
     {
         enum : size_t { value = sizeof...(Hs) };
     };
 
     //
-    // codomain_size<Hash>
+    // hash_bitsize
     //
 
-    template <typename H>
-    struct hash_codomain_size
+    template <typename Hash>
+    struct hash_bitsize
     {
-        enum : size_t { value = sizeof(H{}(0)) * 8} ;
+        enum : size_t { value = sizeof(Hash{}(0)) * 8} ;
     };
-    template <size_t N, typename H>
-    struct hash_codomain_size<FoldHash<N, H>>
+    template <size_t N, typename Hash>
+    struct hash_bitsize<HashFold<N, Hash>>
     {
         enum : size_t { value = N };
     };
-    template <size_t N, typename ...Hs>
-    struct hash_codomain_size<ModularHash<N, Hs...>>
+
+    template <typename ...Hs>
+    struct hash_bitsize<ModularHash<Hs...>>
     {
-        enum : size_t { value = N* sizeof...(Hs) };
+        enum : size_t { value = hash_total_bitsize<Hs...>::value };
+    };
+
+    // hash_total_bitsize...
+    //
+
+    template <typename ...Hs> struct hash_total_bitsize;
+    
+    template <> 
+    struct hash_total_bitsize<>
+    {
+        enum : size_t { value = 0 };
+    };
+    template <typename H0, typename ...Hs> 
+    struct hash_total_bitsize<H0, Hs...>
+    {
+        enum : size_t { value = hash_bitsize<H0>::value + hash_total_bitsize<Hs...>::value };
     };
 
     //
-    // Hash functions...
+    // hash_offset
+    //
+    
+    template <size_t N, typename H, typename ...Hs>
+    struct hash_offset
+    {
+        enum : size_t { value = hash_bitsize<H>::value + hash_offset<N-1, Hs...>::value };
+    };
+
+    template <typename H, typename ...Hs>
+    struct hash_offset<0, H, Hs...>
+    {
+        enum : size_t { value = 0 };
+    };
+    
+
+    //
+    // Few hash functions...
     // 
 
     struct H1
