@@ -89,7 +89,7 @@ namespace pds {
         void operator()(T const &elem)
         {
             auto h = Hash{}(elem);
-            auto j = h & ((1ULL << K) -1);
+            auto j = h & make_mask(K);
             auto v = h >> K;
 
             m_[j] = std::max<size_t>( m_[j], rank(v) );
