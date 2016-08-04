@@ -114,7 +114,26 @@ namespace pds {
         {
             return continuation_(elem, pred, std::make_index_sequence<sizeof...(Hs)>());
         }
+        
+        //
+        // foreach index... 
+        //
  
+        template <typename Fun>
+        void foreach_index(std::vector<std::vector<size_t>> const &idx, Fun fun)
+        {
+            size_t i = 0;
+            for(auto const & row : idx)
+            {
+                for (auto const & j : row)
+                {
+                    fun(data_[i][j]);   
+                }
+                i++;
+            }
+        }
+
+
         //
         // increment buckets
         //
