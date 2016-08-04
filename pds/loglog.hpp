@@ -124,7 +124,6 @@ namespace pds {
         }
 
         std::vector<uint8_t> m_;
-        size_t rank_;
         Hash hash_;
     };
 

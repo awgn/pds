@@ -59,6 +59,9 @@ namespace pds {
         static constexpr double value = 0.7213/(1.0 + 1.079/M);
     };
 
+    template <> struct static_alpha<2>  { static constexpr double value = 0.351;  };
+    template <> struct static_alpha<4>  { static constexpr double value = 0.532;  };
+    template <> struct static_alpha<8>  { static constexpr double value = 0.625;  };
     template <> struct static_alpha<16> { static constexpr double value = 0.673;  };
     template <> struct static_alpha<32> { static constexpr double value = 0.697;  };
     template <> struct static_alpha<64> { static constexpr double value = 0.709;  };
@@ -159,7 +162,6 @@ namespace pds {
     private:
 
         std::vector<uint8_t> m_;
-        size_t rank_;
         Hash hash_;
     };
 
