@@ -54,11 +54,11 @@ auto h = Group("Hyper")
     
     .Single("hashing", []
     {
-        pds::hyperloglog<int, 16, pds::H2> llc;
+        pds::hyperloglog<int, 1024, pds::H2> llc;
 
         std::mt19937 rand;
 
-        for(int n = 0; n < 1000; n++)
+        for(int n = 0; n < 10000; n++)
         {
             llc(rand());
             std::cout << (n+1) << ": -> " << llc.cardinality() << std::endl;

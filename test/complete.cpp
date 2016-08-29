@@ -121,14 +121,18 @@ auto g = Group("Complete")
 
     .Single("hyperloglog", []
     {
-        pds::sketch< pds::hyperloglog< std::tuple<uint16_t, uint16_t>, 128, std::hash<std::tuple<uint16_t, uint16_t>>>
-                   , (1 << 12)
-                   , pds::ModularHash<bit_3(H1), bit_3(H1), bit_3(H1), bit_3(H1)> 
-                   , pds::ModularHash<bit_3(H2), bit_3(H2), bit_3(H2), bit_3(H2)> 
-                   , pds::ModularHash<bit_3(H3), bit_3(H3), bit_3(H3), bit_3(H3)> 
-                   , pds::ModularHash<bit_3(H4), bit_3(H4), bit_3(H4), bit_3(H4)> 
-                   , pds::ModularHash<bit_3(H5), bit_3(H5), bit_3(H5), bit_3(H5)> 
-                   , pds::ModularHash<bit_3(H6), bit_3(H6), bit_3(H6), bit_3(H6)> 
+        using loglog_t = pds::hyperloglog                                                                               
+                    <  std::tuple<uint16_t, uint16_t>                               // internally hashing ports only   
+                    ,  64                                                                                         
+                    ,  std::hash<std::tuple<uint16_t, uint16_t>>         
+                    >;                                                                                                                 
+                     
+        pds::sketch< loglog_t                      
+                   , (1 << 20)
+                   , pds::ModularHash<bit_5(H1), bit_5(H1), bit_5(H1), bit_5(H1)>   // IP components...
+                   , pds::ModularHash<bit_5(H2), bit_5(H2), bit_5(H2), bit_5(H2)> 
+                   , pds::ModularHash<bit_5(H3), bit_5(H3), bit_5(H3), bit_5(H3)> 
+                   , pds::ModularHash<bit_5(H4), bit_5(H4), bit_5(H4), bit_5(H4)> 
                    > s;
 
         std::mt19937 rand;
@@ -138,7 +142,8 @@ auto g = Group("Complete")
             auto sport = rand();
             auto dport = i;
 
-            s.foreach_bucket(std::make_tuple(0xbad,  0xbee,  0xdead, 0xbeef), [&](auto &hllc) {
+            s.foreach_bucket(std::make_tuple(0xbad,  0xbee,  0xdead, 0xbeef), [&](auto &hllc) 
+            {
                 hllc(std::tuple<uint16_t, uint16_t>{sport, dport});
             });
         }
@@ -154,6 +159,7 @@ auto g = Group("Complete")
 
         std::cout << "idx: " << cat::show(idx) << std::endl;
         
+        
         auto r = pds::all_candidates(s, 
                                      std::make_tuple(pds::numeric_range<uint16_t>(0, 0xffff), 
                                                      pds::numeric_range<uint16_t>(0, 0xffff),
@@ -166,7 +172,7 @@ auto g = Group("Complete")
         auto res = pds::expand_cartesian_product_by(r, pds::merge_annotated);
 
         for(auto & t: res)
-                std::cout << "candidate => " << t.value << std::endl;
+            std::cout << "candidate => " << t.value << std::endl;
 
         s.foreach_index(idx, [](auto &hllc) 
         {
