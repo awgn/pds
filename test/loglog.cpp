@@ -19,7 +19,7 @@ auto g = Group("LogLog")
         for(int n = 0; n < 10; n++)
         {
             llc("123ABC" + std::to_string(n));
-            std::cout << n << ": -> " << llc.cardinality() << std::endl;
+            std::cout << (n+1) << ": -> " << llc.cardinality() << std::endl;
         }
     })
 
@@ -40,7 +40,7 @@ auto h = Group("Hyper")
         for(int n = 0; n < 10; n++)
         {
             llc("123ABC" + std::to_string(n));
-            std::cout << n << ": -> " << llc.cardinality() << std::endl;
+            std::cout << (n+1) << ": -> " << llc.cardinality() << std::endl;
         }
     })
 
@@ -58,12 +58,11 @@ auto h = Group("Hyper")
 
         std::mt19937 rand;
 
-        for(int n = 0; n < 10000; n++)
+        for(int n = 0; n < 1000; n++)
         {
             llc(rand());
+            std::cout << (n+1) << ": -> " << llc.cardinality() << std::endl;
         }
-            
-        std::cout << llc.cardinality() << std::endl;
     })
     ;
 
