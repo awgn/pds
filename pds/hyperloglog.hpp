@@ -27,6 +27,7 @@
 #pragma once
 
 #include <pds/utility.hpp>
+#include <pds/hash.hpp>
 
 #include <iostream>
 
@@ -68,13 +69,13 @@ namespace pds {
 
 
     template <typename T, size_t M = 1024, typename Hash = std::hash<T>>
-    class hyperloglog
+    struct hyperloglog
     {
-        static_assert((M&(M-1)) == 0, "HLLC: groups (m) must be a power of two");
-
-    public:
-
         constexpr static size_t K = log2(M);
+        constexpr static size_t L = hash_bitsize<Hash>::value;
+
+        static_assert((M&(M-1)) == 0, "HLLC: groups (m) must be a power of two");
+        static_assert(L > K+3,        "HLLC: the hash_bitsize must be greater than K");
 
         template <typename X = Hash>
         hyperloglog(X x = X())
@@ -124,11 +125,11 @@ namespace pds {
             }
             else
             {
-                constexpr double exp2_32 = 1ULL<<32;
+                constexpr double exp2_L = exp2(hash_bitsize<Hash>::value); 
 
-                if (e > exp2_32/30)
+                if (e > exp2_L/30)
                 {
-                    e = -exp2_32 * std::log(1.0 - e/exp2_32);
+                    e = -exp2_L * std::log(1.0 - e/exp2_L);
                 }
             }
 
