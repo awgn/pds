@@ -33,6 +33,26 @@
 #include <functional>
 
 
+namespace std
+{
+    template <typename ...Ts>
+    struct hash<std::tuple<Ts...>>
+    {
+        size_t operator()(std::tuple<Ts...> const &t) const
+        {
+            size_t ret = 0;
+
+            pds::tuple_foreach([&](auto const &elem)
+            {
+                auto h = std::hash<std::decay_t<decltype(elem)>>{};
+                ret ^= h(elem);
+            }, t);
+
+            return ret;
+        }
+    };
+}
+
 namespace pds {
 
     
@@ -163,6 +183,11 @@ namespace pds {
     {
         enum : size_t { value = sizeof(Hash{}(0)) * 8} ;
     };
+    template <typename T>
+    struct hash_bitsize<std::hash<T>>
+    {
+        enum : size_t { value = sizeof(size_t) * 8} ;
+    };
     template <size_t N, typename Hash>
     struct hash_bitsize<HashFold<N, Hash>>
     {
@@ -285,23 +310,3 @@ namespace pds {
 
 
 
-namespace std
-{
-    template <typename ...Ts>
-    struct hash<std::tuple<Ts...>>
-    {
-        uint64_t operator()(std::tuple<Ts...> const &t) const
-        {
-            uint64_t ret = 0;
-
-            pds::tuple_foreach([&](auto const &elem)
-            {
-                auto h = std::hash<std::decay_t<decltype(elem)>>{};
-                ret ^= h(elem);
-            }, t);
-
-            return ret;
-        }
-    };
-
-}
