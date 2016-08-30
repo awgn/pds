@@ -181,6 +181,55 @@ auto g = Group("Complete")
         });
     })
 
+    .Single("final", []
+    {
+        using loglog_t = pds::hyperloglog                                                                               
+                    <  uint8_t                               
+                    ,  64
+                    ,  std::hash<std::tuple<uint16_t, uint16_t>>         
+                    >;                                                                                                                 
+                     
+        pds::sketch< loglog_t                      
+                   , (1 << 16)
+                   , pds::ModularHash<BIT_4(H1), BIT_4(H1), BIT_4(H1), BIT_4(H1)>   // IP components...
+                   , pds::ModularHash<BIT_4(H2), BIT_4(H2), BIT_4(H2), BIT_4(H2)> 
+                   , pds::ModularHash<BIT_4(H3), BIT_4(H3), BIT_4(H3), BIT_4(H3)> 
+                   , pds::ModularHash<BIT_4(H4), BIT_4(H4), BIT_4(H4), BIT_4(H4)> 
+                   , pds::ModularHash<BIT_4(H5), BIT_4(H5), BIT_4(H5), BIT_4(H5)> 
+                   > s;
+
+        std::mt19937 rand;
+
+        for(int i = 0; i < 65000; i++)
+        {
+            auto sport = 20;
+            auto dport = i;
+
+            s.foreach_bucket(std::make_tuple(0xbad,  0xbee,  0xdead, 0xbeef), [&](auto &hllc) 
+            {
+                hllc(std::tuple<uint16_t, uint16_t>{sport, dport});
+            });
+        }
+
+        // 
+        // get the index of the buckets whose value is greater than 1000...
+        //
+
+        auto idx = s.index_buckets([](auto &b)
+                                 {
+                                    return b.cardinality() > 10000;
+                                 });
+
+        auto res = pds::reverse_sketch<uint16_t, uint16_t, uint16_t, uint16_t>(s, idx); 
+
+        for(auto & t: res)
+            std::cout << "candidate => " << t.value << std::endl;
+
+        s.foreach_index(idx, [](auto &hllc) 
+        {
+            std::cout << "cardinality => " << hllc.cardinality() << std::endl;
+        });
+    })
     ;
 
 

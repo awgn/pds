@@ -26,10 +26,12 @@
 
 #pragma once
 
+#include <pds/cartesian.hpp>
 #include <pds/sketch.hpp>
 #include <pds/annotated.hpp>
 #include <pds/hash.hpp>
 #include <pds/tuple.hpp>
+#include <pds/range.hpp>
 
 #include <vector>
 #include <tuple>
@@ -183,6 +185,19 @@ namespace pds {
                                      , buckets
                                      , std::make_index_sequence<sizeof...(Ranges)>{});
     }                    
+
+
+    template < typename ...Ts, typename Sketch >
+    auto reverse_sketch( Sketch const &sketch
+                       , std::vector<std::vector<size_t>> const &buckets)
+    {
+        auto res = all_candidates( sketch
+                                 , std::make_tuple( pds::make_range<Ts>::run()...)
+                                 , buckets);
+
+        return expand_cartesian_product_by(res, pds::merge_annotated);
+    } 
+
 
 
 } // namespace pds
