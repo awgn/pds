@@ -2,10 +2,26 @@
 
 #include <iostream>
 #include <algorithm>
+#include <vector>
 
 #include <yats.hpp>
 
 using namespace yats;
+
+
+struct Test { };
+
+namespace pds
+{
+    template <> struct make_range<Test>
+    {
+        static 
+        std::vector<int> run()
+        {
+            return std::vector<int>{1,2,3};
+        }
+    };
+}
 
 
 auto g = Group("Range")
@@ -38,6 +54,21 @@ auto g = Group("Range")
         }
     })
 
+    .Single("make_range", []
+    {
+        for(auto e : pds::make_range<uint8_t>::run())
+        {
+            std::cout << (int)e << std::endl;
+        }
+    })
+
+    .Single("user-defined-range", []
+    {
+        for(auto e : pds::make_range<Test>::run())
+        {
+            std::cout << (int)e << std::endl;
+        }
+    })
     ;
 
 

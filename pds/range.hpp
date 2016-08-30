@@ -28,6 +28,7 @@
 
 #include <algorithm>
 #include <numeric>
+#include <limits>
 
 #include <experimental/optional>
 
@@ -151,5 +152,16 @@ namespace pds {
         }
     };
 
+
+    template <typename T, typename = void> struct make_range;
+    
+    template <typename T>
+    struct make_range<T, std::enable_if_t<std::is_integral<T>::value>>
+    {
+        static auto run()
+        {
+            return numeric_range<T>{std::numeric_limits<T>::min(), std::numeric_limits<T>::max()};
+        }
+    };
 
 } // namespace pds
