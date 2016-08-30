@@ -126,7 +126,7 @@ namespace pds {
             }
             else
             {
-                constexpr double exp2_L = exp2(hash_bitsize<Hash>::value); 
+                double exp2_L = exp2(hash_bitsize<Hash>::value); 
 
                 if (e > exp2_L/30)
                 {
