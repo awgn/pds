@@ -49,7 +49,7 @@ namespace pds {
     // Symposium on Algorithms (ESA03) 2832. Springer. pp. 605–617
     //
 
-    template <typename T, size_t M = 1024, typename Hash = std::hash<T>>
+    template <typename Tb, size_t M, typename Hash>
     class loglog
     {
         static_assert((M&(M-1)) == 0, "LLC: groups (m) must be a power of two");
@@ -68,6 +68,7 @@ namespace pds {
         // hash and process the element:
         //
 
+        template <typename T>
         void operator()(T const &elem)
         {
             auto h = hash_(elem);
@@ -123,14 +124,14 @@ namespace pds {
             return 1.0 / std::pow(gamma * ratio, value);
         }
 
-        std::vector<uint8_t> m_;
+        std::vector<Tb> m_;
         Hash hash_;
     };
 
 
-    template <typename T, size_t M,  typename Hash>
-    inline loglog<T, M, Hash> 
-    operator+(loglog<T, M, Hash> lhs, loglog<T, M, Hash> const &rhs)
+    template <typename Tb, size_t M,  typename Hash>
+    inline loglog<Tb, M, Hash> 
+    operator+(loglog<Tb, M, Hash> lhs, loglog<Tb, M, Hash> const &rhs)
     {
         return lhs += rhs;
     }

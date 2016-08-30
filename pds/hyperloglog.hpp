@@ -68,7 +68,7 @@ namespace pds {
     template <> struct static_alpha<64> { static constexpr double value = 0.709;  };
 
 
-    template <typename T, size_t M = 1024, typename Hash = std::hash<T>>
+    template <typename Tb, size_t M, typename Hash>
     struct hyperloglog
     {
         constexpr static size_t K = log2(M);
@@ -87,6 +87,7 @@ namespace pds {
         // hash and process the element:
         //
 
+        template <typename T>
         void operator()(T const &elem)
         {
             auto h = Hash{}(elem);
@@ -162,14 +163,14 @@ namespace pds {
 
     private:
 
-        std::vector<uint8_t> m_;
+        std::vector<Tb> m_;
         Hash hash_;
     };
 
 
-    template <typename T, size_t M,  typename Hash>
-    inline hyperloglog<T, M, Hash> 
-    operator+(hyperloglog<T, M, Hash> lhs, hyperloglog<T, M, Hash> const &rhs)
+    template <typename Tb, size_t M,  typename Hash>
+    inline hyperloglog<Tb, M, Hash> 
+    operator+(hyperloglog<Tb, M, Hash> lhs, hyperloglog<Tb, M, Hash> const &rhs)
     {
         return lhs += rhs;
     }

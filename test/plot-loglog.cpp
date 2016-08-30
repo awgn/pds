@@ -7,8 +7,8 @@
 int
 main(int, char *[])
 {
-    pds::loglog<int, 1024> c;
-    pds::hyperloglog<int, 1024> h;
+    pds::loglog<uint8_t, 1024, std::hash<int>> c;
+    pds::hyperloglog<uint8_t, 1024, std::hash<int>> h;
 
     std::mt19937 rand;
 

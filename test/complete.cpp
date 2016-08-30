@@ -122,7 +122,7 @@ auto g = Group("Complete")
     .Single("hyperloglog-rsketch", []
     {
         using loglog_t = pds::hyperloglog                                                                               
-                    <  std::tuple<uint16_t, uint16_t>                               // internally hashing ports only   
+                    <  uint8_t                               
                     ,  64
                     ,  std::hash<std::tuple<uint16_t, uint16_t>>         
                     >;                                                                                                                 

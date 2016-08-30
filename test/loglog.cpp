@@ -14,7 +14,7 @@ auto g = Group("LogLog")
 
     .Single("simple", []
     {
-        pds::loglog<std::string> llc;
+        pds::loglog<uint8_t, 1024, std::hash<std::string>> llc;
 
         for(int n = 0; n < 10; n++)
         {
@@ -25,7 +25,7 @@ auto g = Group("LogLog")
 
     .Single("merge", []
     {
-        pds::loglog<std::string> llc;
+        pds::loglog<uint8_t, 1024, std::hash<std::string>> llc;
         llc += llc;
     })
     ;
@@ -35,7 +35,7 @@ auto h = Group("Hyper")
 
     .Single("simple", []
     {
-        pds::hyperloglog<std::string> llc;
+        pds::hyperloglog<uint8_t, 1024, std::hash<std::string>> llc;
 
         for(int n = 0; n < 10; n++)
         {
@@ -46,7 +46,7 @@ auto h = Group("Hyper")
 
     .Single("merge", []
     {
-        pds::hyperloglog<std::string> llc;
+        pds::hyperloglog<uint8_t, 1024, std::hash<std::string>> llc;
         llc += llc;
 
         Assert( llc.cardinality(), is_equal_to(0));
@@ -54,7 +54,7 @@ auto h = Group("Hyper")
     
     .Single("hashing", []
     {
-        pds::hyperloglog<int, 1024, pds::H2> llc;
+        pds::hyperloglog<uint8_t, 1024, pds::H2> llc;
 
         std::mt19937 rand;
 
