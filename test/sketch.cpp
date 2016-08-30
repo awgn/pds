@@ -44,7 +44,7 @@ auto g = Group("Sketch")
 
     .Single("simple", []
     {
-        pds::sketch<int, (1<<10), bit_10(std::hash<int>), bit_10(std::hash<int>) > sk;
+        pds::sketch<int, (1<<10), BIT_10(std::hash<int>), BIT_10(std::hash<int>) > sk;
 
         sk.foreach_bucket(10, [](int &ctr)
         {
@@ -57,7 +57,7 @@ auto g = Group("Sketch")
 
     .Single("hash", []
     {
-        pds::sketch<int, (1 << 5), bit_5(konst_hash), bit_5(konst_hash)> sk;
+        pds::sketch<int, (1 << 5), BIT_5(konst_hash), BIT_5(konst_hash)> sk;
 
         sk.foreach_bucket(1, [](int &ctr)
         {
@@ -207,9 +207,9 @@ auto g = Group("Sketch")
 
     .Single("large_filter", []
     {
-        pds::sketch<uint32_t, (1<<6), bit_6(std::hash<uint32_t>),
-                                      bit_6(hash1),
-                                      bit_6(hash2)> ips;
+        pds::sketch<uint32_t, (1<<6), BIT_6(std::hash<uint32_t>),
+                                      BIT_6(hash1),
+                                      BIT_6(hash2)> ips;
 
         ips.increment_buckets(0xff114200);
         ips.increment_buckets(0xffffff00);

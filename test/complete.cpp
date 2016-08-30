@@ -23,10 +23,10 @@ auto g = Group("Complete")
     {
         pds::sketch< uint16_t
                    , (1<<20)
-                   , pds::ModularHash< bit_5(H1), bit_5(H1), bit_5(H1), bit_5(H1)> 
-                   , pds::ModularHash< bit_5(H2), bit_5(H2), bit_5(H2), bit_5(H2)> 
-                   , pds::ModularHash< bit_5(H3), bit_5(H3), bit_5(H3), bit_5(H3)> 
-                   , pds::ModularHash< bit_5(H4), bit_5(H4), bit_5(H4), bit_5(H4)> 
+                   , pds::ModularHash< BIT_5(H1), BIT_5(H1), BIT_5(H1), BIT_5(H1)> 
+                   , pds::ModularHash< BIT_5(H2), BIT_5(H2), BIT_5(H2), BIT_5(H2)> 
+                   , pds::ModularHash< BIT_5(H3), BIT_5(H3), BIT_5(H3), BIT_5(H3)> 
+                   , pds::ModularHash< BIT_5(H4), BIT_5(H4), BIT_5(H4), BIT_5(H4)> 
                    > s;
 
         for(int i = 0; i < 1000; i++)
@@ -66,12 +66,12 @@ auto g = Group("Complete")
     {
         pds::sketch< uint16_t
                    , (1<< 21)
-                   , pds::ModularHash<bit_3(H1), bit_3(H1), bit_3(H1), bit_3(H1), bit_3(H1), bit_3(H1), bit_3(H1)> 
-                   , pds::ModularHash<bit_3(H2), bit_3(H2), bit_3(H2), bit_3(H2), bit_3(H2), bit_3(H2), bit_3(H2)> 
-                   , pds::ModularHash<bit_3(H3), bit_3(H3), bit_3(H3), bit_3(H3), bit_3(H3), bit_3(H3), bit_3(H3)> 
-                   , pds::ModularHash<bit_3(H4), bit_3(H4), bit_3(H4), bit_3(H4), bit_3(H4), bit_3(H4), bit_3(H4)> 
-                   , pds::ModularHash<bit_3(H5), bit_3(H5), bit_3(H5), bit_3(H5), bit_3(H5), bit_3(H5), bit_3(H5)> 
-                   , pds::ModularHash<bit_3(H6), bit_3(H6), bit_3(H6), bit_3(H6), bit_3(H6), bit_3(H6), bit_3(H6)> 
+                   , pds::ModularHash<BIT_3(H1), BIT_3(H1), BIT_3(H1), BIT_3(H1), BIT_3(H1), BIT_3(H1), BIT_3(H1)> 
+                   , pds::ModularHash<BIT_3(H2), BIT_3(H2), BIT_3(H2), BIT_3(H2), BIT_3(H2), BIT_3(H2), BIT_3(H2)> 
+                   , pds::ModularHash<BIT_3(H3), BIT_3(H3), BIT_3(H3), BIT_3(H3), BIT_3(H3), BIT_3(H3), BIT_3(H3)> 
+                   , pds::ModularHash<BIT_3(H4), BIT_3(H4), BIT_3(H4), BIT_3(H4), BIT_3(H4), BIT_3(H4), BIT_3(H4)> 
+                   , pds::ModularHash<BIT_3(H5), BIT_3(H5), BIT_3(H5), BIT_3(H5), BIT_3(H5), BIT_3(H5), BIT_3(H5)> 
+                   , pds::ModularHash<BIT_3(H6), BIT_3(H6), BIT_3(H6), BIT_3(H6), BIT_3(H6), BIT_3(H6), BIT_3(H6)> 
                    > s;
 
         for(int i = 0; i < 1000; i++)
@@ -119,27 +119,28 @@ auto g = Group("Complete")
                 std::cout << "candidate => " << t.value << std::endl;
     })
 
-    .Single("hyperloglog", []
+    .Single("hyperloglog-rsketch", []
     {
         using loglog_t = pds::hyperloglog                                                                               
                     <  std::tuple<uint16_t, uint16_t>                               // internally hashing ports only   
-                    ,  64                                                                                         
+                    ,  64
                     ,  std::hash<std::tuple<uint16_t, uint16_t>>         
                     >;                                                                                                                 
                      
         pds::sketch< loglog_t                      
-                   , (1 << 20)
-                   , pds::ModularHash<bit_5(H1), bit_5(H1), bit_5(H1), bit_5(H1)>   // IP components...
-                   , pds::ModularHash<bit_5(H2), bit_5(H2), bit_5(H2), bit_5(H2)> 
-                   , pds::ModularHash<bit_5(H3), bit_5(H3), bit_5(H3), bit_5(H3)> 
-                   , pds::ModularHash<bit_5(H4), bit_5(H4), bit_5(H4), bit_5(H4)> 
+                   , (1 << 16)
+                   , pds::ModularHash<BIT_4(H1), BIT_4(H1), BIT_4(H1), BIT_4(H1)>   // IP components...
+                   , pds::ModularHash<BIT_4(H2), BIT_4(H2), BIT_4(H2), BIT_4(H2)> 
+                   , pds::ModularHash<BIT_4(H3), BIT_4(H3), BIT_4(H3), BIT_4(H3)> 
+                   , pds::ModularHash<BIT_4(H4), BIT_4(H4), BIT_4(H4), BIT_4(H4)> 
+                   , pds::ModularHash<BIT_4(H5), BIT_4(H5), BIT_4(H5), BIT_4(H5)> 
                    > s;
 
         std::mt19937 rand;
 
-        for(int i = 0; i < 1000; i++)
+        for(int i = 0; i < 65000; i++)
         {
-            auto sport = rand();
+            auto sport = 20;
             auto dport = i;
 
             s.foreach_bucket(std::make_tuple(0xbad,  0xbee,  0xdead, 0xbeef), [&](auto &hllc) 
@@ -154,7 +155,7 @@ auto g = Group("Complete")
 
         auto idx = s.index_buckets([](auto &b)
                                  {
-                                    return b.cardinality() > 500;
+                                    return b.cardinality() > 10000;
                                  });
 
         std::cout << "idx: " << cat::show(idx) << std::endl;

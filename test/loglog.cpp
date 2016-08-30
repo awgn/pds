@@ -58,7 +58,7 @@ auto h = Group("Hyper")
 
         std::mt19937 rand;
 
-        for(int n = 0; n < 10000; n++)
+        for(int n = 0; n < 100000; n++)
         {
             llc(rand());
             std::cout << (n+1) << ": -> " << llc.cardinality() << std::endl;

@@ -142,22 +142,22 @@ namespace pds {
         Hash hash_;
     };
 
-    #define bit_1(x)  pds::HashFold<1,x>
-    #define bit_2(x)  pds::HashFold<2,x>
-    #define bit_3(x)  pds::HashFold<3,x>
-    #define bit_4(x)  pds::HashFold<4,x>
-    #define bit_5(x)  pds::HashFold<5,x>
-    #define bit_6(x)  pds::HashFold<6,x>
-    #define bit_7(x)  pds::HashFold<7,x>
-    #define bit_8(x)  pds::HashFold<8,x>
-    #define bit_9(x)  pds::HashFold<9,x>
-    #define bit_10(x) pds::HashFold<10,x>
-    #define bit_11(x) pds::HashFold<11,x>
-    #define bit_12(x) pds::HashFold<12,x>
-    #define bit_13(x) pds::HashFold<13,x>
-    #define bit_14(x) pds::HashFold<14,x>
-    #define bit_15(x) pds::HashFold<15,x>
-    #define bit_16(x) pds::HashFold<16,x>
+    #define BIT_1(x)  pds::HashFold<1,x>
+    #define BIT_2(x)  pds::HashFold<2,x>
+    #define BIT_3(x)  pds::HashFold<3,x>
+    #define BIT_4(x)  pds::HashFold<4,x>
+    #define BIT_5(x)  pds::HashFold<5,x>
+    #define BIT_6(x)  pds::HashFold<6,x>
+    #define BIT_7(x)  pds::HashFold<7,x>
+    #define BIT_8(x)  pds::HashFold<8,x>
+    #define BIT_9(x)  pds::HashFold<9,x>
+    #define BIT_10(x) pds::HashFold<10,x>
+    #define BIT_11(x) pds::HashFold<11,x>
+    #define BIT_12(x) pds::HashFold<12,x>
+    #define BIT_13(x) pds::HashFold<13,x>
+    #define BIT_14(x) pds::HashFold<14,x>
+    #define BIT_15(x) pds::HashFold<15,x>
+    #define BIT_16(x) pds::HashFold<16,x>
 
     //
     // hash_rank
