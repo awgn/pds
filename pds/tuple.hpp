@@ -80,10 +80,10 @@ namespace pds {
         }
         
         
-        template <typename Fun, typename T, typename TupleT, size_t N>
-        auto tuple_fold(Fun fun, T acc, TupleT &&tup, std::index_sequence<N>)
+        template <typename Fun, typename T, typename TupleT>
+        auto tuple_fold(Fun, T acc, TupleT &&, std::index_sequence<>)
         {
-            return  fun(std::move(acc), std::get<N>(tup));
+            return acc;
         }
         template <typename Fun, typename T, typename TupleT, size_t N, size_t ...Ns>
         auto tuple_fold(Fun fun, T acc, TupleT &&tup, std::index_sequence<N, Ns...>)
@@ -210,10 +210,10 @@ namespace pds {
     {
         return std::tuple<>{};
     }
-    template <typename T, typename ...Ts>
-    auto tuple_tail(std::tuple<T, Ts...> const &t)
+    template <typename T1, typename T2, typename ...Ts>
+    auto tuple_tail(std::tuple<T1, T2, Ts...> const &t)
     {
-        std::tuple<Ts...> ret;
+        std::tuple<T2, Ts...> ret;
 
         tuple_foreach_index([&](auto Idx, auto &ret_i) {
             size_t constexpr const I = decltype(Idx)::value;
