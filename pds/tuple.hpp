@@ -44,7 +44,6 @@ namespace pds {
         {
             std::initializer_list<bool> sink {(fun(std::get<N>(std::forward<TupleT>(tup))), true)...};
             (void)sink;
-            (void)fun;
         }
         
         template <typename Fun, typename TupleT, size_t ...N>
@@ -52,7 +51,6 @@ namespace pds {
         {
             std::initializer_list<bool> sink {(fun(std::integral_constant<size_t,N>{}, std::get<N>(std::forward<TupleT>(tup))), true)...};
             (void)sink;
-            (void)fun;
         }
         
         template <typename Fun, typename TupleT, size_t ...N>
