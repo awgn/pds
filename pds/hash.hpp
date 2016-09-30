@@ -160,6 +160,28 @@ namespace pds {
     #define BIT_16(x) pds::HashFold<16,x>
 
     //
+    // Universal Hash
+    //
+    
+   
+    template <size_t M, size_t a, size_t b>
+    struct universal
+    {
+        static_assert(a > 0, 
+                      "universal: 'a' must be a positive integer");
+
+        static_assert(a & 1,  
+                      "universal: 'a' must be an odd integer");
+
+        template <typename T>
+        size_t operator()(T x) const
+        {
+            static_assert(b < (1ULL << (sizeof(T)*8 - M)) , "universal: 'b' must be less than 2^(bitsize(T)-M)");
+            return ((a*x+b) >> (sizeof(T)*8-M)) & ((1 << M)-1); 
+        }
+    };
+    
+    //
     // hash_rank
     //
 
@@ -194,6 +216,11 @@ namespace pds {
         enum : size_t { value = N };
     };
 
+    template <size_t M, size_t a, size_t b>
+    struct hash_bitsize<universal<M, a, b>>
+    {
+        enum : size_t { value = M };
+    };
     template <typename ...Hs>
     struct hash_bitsize<ModularHash<Hs...>>
     {

@@ -38,6 +38,17 @@ auto g = Group("Hash")
 
     })
 
+    .Single("universal", []
+    {
+        using u1 = pds::universal<5, 8191, 33>;
+
+        std::cout << "rank   : " << pds::hash_rank<u1>::value << std::endl;
+        std::cout << "bitsize: " << pds::hash_bitsize<u1>::value << std::endl;
+
+        std::cout << "hash   : " << u1{}(static_cast<uint16_t>(45)) << std::endl;
+        std::cout << "hash   : " << u1{}(static_cast<uint16_t>(127)) << std::endl;
+        std::cout << "hash   : " << u1{}(static_cast<uint16_t>(8080)) << std::endl;
+    })
     ;
 
 
