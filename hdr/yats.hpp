@@ -509,7 +509,7 @@ namespace yats
         Single(std::string name, Fun f) &
         {
             check_unique_test_name(name);
-            test_.emplace_back(std::move(name), [=] (int) { f(); });
+            test_.emplace_back(std::move(name), [=] (int, int, char *[]) { f(); });
             return *this;
         }
         template <typename Fun>
@@ -517,7 +517,7 @@ namespace yats
         Single(std::string name, Fun f) &&
         {
             check_unique_test_name(name);
-            test_.emplace_back(std::move(name), [=] (int) { f(); });
+            test_.emplace_back(std::move(name), [=] (int, int, char *[]) { f(); });
             return std::move(*this);
         }
 
@@ -526,7 +526,7 @@ namespace yats
         Repeat(std::string name, Fun f) &
         {
             check_unique_test_name(name);
-            test_.emplace_back(std::move(name), [=](int run) {
+            test_.emplace_back(std::move(name), [=](int run, int, char *[]) {
                                     for(int i = 0; i < run; i++)
                                         f();
                                   });
@@ -537,9 +537,30 @@ namespace yats
         Repeat(std::string name, Fun f) &&
         {
             check_unique_test_name(name);
-            test_.emplace_back(std::move(name), [=](int run) {
+            test_.emplace_back(std::move(name), [=](int run, int, char *[]) {
                                     for(int i = 0; i < run; i++)
                                         f();
+                                  });
+            return std::move(*this);
+        }
+        
+        template <typename Fun>
+        Group &
+        Main(std::string name, Fun f) &
+        {
+            check_unique_test_name(name);
+            test_.emplace_back(std::move(name), [=](int, int argc, char *argv[]) {
+                                        f(argc, argv); 
+                                  });
+            return *this;
+        }
+        template <typename Fun>
+        Group &&
+        Main(std::string name, Fun f) &&
+        {
+            check_unique_test_name(name);
+            test_.emplace_back(std::move(name), [=](int, int argc, char *argv[]) {
+                                        f(argc, argv); 
                                   });
             return std::move(*this);
         }
@@ -555,7 +576,7 @@ namespace yats
         std::vector<task<void()>> setup_;
         std::vector<task<void()>> teardown_;
         std::vector<task<void()>> prolog_;
-        std::vector<task<void(int)>> test_;
+        std::vector<task<void(int, int, char *[])>> test_;
         std::vector<task<void()>> epilog_;
 
         std::set<std::string> test_names_;
@@ -565,7 +586,7 @@ namespace yats
 
     static void usage(const char *name)
     {
-        std::cout << "Yats usage: " << name << " [options] [test...]" << std::endl;
+        std::cout << "Yats usage: " << name << " [options] [test...] -- args" << std::endl;
         std::cout << "Options:\n";
         std::cout << "  -e, --exit-immediately  On error exit.\n";
         std::cout << "  -g, --group group       Run tests from the given group.\n";
@@ -587,12 +608,13 @@ namespace yats
              verbose         = false,
              capture_signal  = false;
         int  repeat_run      = 1000;
+        int  skip = 1;
 
         std::set<std::string> run_ctx, run_test;
 
         global::instance().program_name = argv[0];
 
-        for(auto arg = argv + 1; argv && (arg != argv + argc); ++arg)
+        for(auto arg = argv + 1; argv && (arg != argv + argc); ++arg, ++skip)
         {
             if (strcmp(*arg, "-h") == 0 ||
                 strcmp(*arg, "-?") == 0 ||
@@ -652,6 +674,11 @@ namespace yats
                 _Exit(0);
             }
 
+            if (strcmp(*arg, "--") == 0) {
+                ++skip;
+                break;
+            }
+
             run_test.insert(*arg);
         }
 
@@ -680,7 +707,7 @@ namespace yats
                 return static_cast<size_t>(
                         std::count_if(std::begin(ctx->test_),
                                      std::end(ctx->test_),
-                                     [&] (task<void(int)> const &t)
+                                     [&] (task<void(int, int, char *[])> const &t)
                                      {
                                          return std::find(std::begin(run_test), std::end(run_test), t.first) != std::end(run_test);
                                      }));
@@ -735,7 +762,7 @@ namespace yats
                 {
                     try
                     {
-                        t.second(repeat_run);
+                        t.second(repeat_run, argc - skip, argv + skip);
                         retry = false;
                         if (!err)
                             ok++;
