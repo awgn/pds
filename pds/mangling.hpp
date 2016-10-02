@@ -69,19 +69,19 @@ namespace pds {
     }
 
 
-    template <int A, typename T>
+    template <unsigned int A, typename T>
     constexpr T mangling(T x)
     {
         static_assert(A % 2 == 1, "mangling: A must be an odd number!");
         return x * A;
     }
 
-    template <int A, typename T>
+    template <unsigned int A, typename T>
     constexpr T demangling(T x)
     {
         static_assert(A % 2 == 1, "demangling: A must be an odd number!");
         constexpr auto n =  static_cast<uint64_t>(1)<<(sizeof(T)*8);
-        return mangling<inv_mod(static_cast<uint64_t>(A), n)>(x);
+        return mangling<static_cast<unsigned int>(inv_mod(static_cast<uint64_t>(A), n))>(x);
     }
 
 
