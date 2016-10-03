@@ -160,6 +160,11 @@ namespace pds {
                 m_[n] = 0;
         }
 
+        constexpr size_t 
+        size() const
+        {
+            return M;
+        }
 
     private:
 

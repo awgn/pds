@@ -143,6 +143,11 @@ auto g = Group("PCAP")
         if (argc < 2)
             throw std::runtime_error("usage: pcap:FILE number_injected_flows:INT");
 
+        auto mem = test_sketch.size().first * test_sketch.size().second *  loglog_t{}.size();
+        std::cout << "MEMORY: " << mem << " bytes (" << (static_cast<double>(mem)/ (1024*1024)) << " Mb)" << std::endl;
+
+        std::cout << "+ loading sketch..." << std::endl;
+
         auto p = pcap_open_offline(argv[0], errbuf);
         if (p == nullptr)
             throw std::runtime_error("pcap_open: " + std::string(errbuf));
@@ -180,10 +185,12 @@ auto g = Group("PCAP")
 
         auto res = pds::reverse_sketch<uint16_t, uint16_t>(test_sketch, idx); 
 
-        for(auto & t: res)
-            std::cout << "candidate => " << inet_ntoa({tuple2ip<13>(t.value)}) << std::endl;
+        std::cout << "> " << res.size() << " candidates found!" << std::endl;
 
-        std::cout << "! done in " << std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now() - start).count() << " usec" << std::endl;
+        for(auto & t: res)
+            std::cout << "  candidate -> " << inet_ntoa({tuple2ip<13>(t.value)}) << std::endl;
+
+        std::cout << "! reversing sketch done in " << std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now() - start).count() << " usec" << std::endl;
 
     })
     

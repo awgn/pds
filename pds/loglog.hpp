@@ -115,6 +115,12 @@ namespace pds {
                 m_[n] = 0;
         }
 
+        constexpr size_t 
+        size() const
+        {
+            return M;
+        }
+
     private:
 
         static double alpha(size_t value)
