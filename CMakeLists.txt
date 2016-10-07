@@ -14,6 +14,7 @@ add_executable(test-annotated  test/annotated.cpp)
 add_executable(test-cartesian test/cartesian.cpp)
 add_executable(test-reversible test/reversible.cpp)
 add_executable(test-complete test/complete.cpp)
+add_executable(test-mangling test/mangling.cpp)
 add_executable(test-pcap test/pcap.cpp)
 
 

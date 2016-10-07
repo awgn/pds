@@ -44,28 +44,6 @@ pds::sketch< loglog_t
 
 
 
-template <unsigned int N>
-std::tuple<uint16_t, uint16_t>
-ip2tuple(uint32_t ip)
-{
-    auto ip_ = pds::mangling<N>(ip);
-    auto u16 = reinterpret_cast<uint16_t *>(&ip_);
-    return std::make_tuple(u16[0], u16[1]);
-}
-
-
-template <unsigned int N>
-uint32_t
-tuple2ip(std::tuple<uint16_t, uint16_t> t)
-{
-    uint32_t ip_;
-    auto u16 = reinterpret_cast<uint16_t *>(&ip_);
-    u16[0] = std::get<0>(t);
-    u16[1] = std::get<1>(t);
-    return pds::demangling<N>(ip_);
-}
-
-
 void
 packet_handler(u_char *, const struct pcap_pkthdr *h, const u_char *payload)
 {
@@ -117,24 +95,6 @@ packet_handler(u_char *, const struct pcap_pkthdr *h, const u_char *payload)
 
 
 auto g = Group("PCAP")
-
-    .Single("mangling", [] {
-            auto x0 = pds::mangling<17>(0xdeadbeef);
-            Assert(pds::demangling<17>(x0) == 0xdeadbeef);
-            
-            auto x1 = pds::mangling<81>(0xdeadbeef);
-            Assert(pds::demangling<81>(x1) == 0xdeadbeef);
-    })
-
-    .Single("ip", [] {
-
-            auto x0 = ip2tuple<13>(0xdeadbeef);
-            Assert(tuple2ip<13>(x0) == 0xdeadbeef);
-            
-            auto x1 = ip2tuple<81>(0xdeadbeef);
-            Assert(tuple2ip<81>(x1) == 0xdeadbeef);
-    })
- 
 
     .Main("pcap",  [] (int argc, char *argv[]) {
 

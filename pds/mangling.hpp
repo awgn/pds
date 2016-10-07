@@ -85,5 +85,26 @@ namespace pds {
     }
 
 
+    template <unsigned int N>
+    std::tuple<uint16_t, uint16_t>
+    ip2tuple(uint32_t ip)
+    {
+        auto ip_ = pds::mangling<N>(ip);
+        auto u16 = reinterpret_cast<uint16_t *>(&ip_);
+        return std::make_tuple(u16[0], u16[1]);
+    }
+
+
+    template <unsigned int N>
+    uint32_t
+    tuple2ip(std::tuple<uint16_t, uint16_t> t)
+    {
+        uint32_t ip_;
+        auto u16 = reinterpret_cast<uint16_t *>(&ip_);
+        u16[0] = std::get<0>(t);
+        u16[1] = std::get<1>(t);
+        return pds::demangling<N>(ip_);
+    }
+
 } // namespace pds
 
