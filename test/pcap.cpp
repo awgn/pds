@@ -96,7 +96,7 @@ packet_handler(u_char *, const struct pcap_pkthdr *h, const u_char *payload)
 
 auto g = Group("PCAP")
 
-    .Main("pcap",  [] (int argc, char *argv[]) {
+    .Main("flow-count",  [] (int argc, char *argv[]) {
 
         char errbuf[PCAP_ERRBUF_SIZE];
 
