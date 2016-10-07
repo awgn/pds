@@ -6,8 +6,8 @@
 #include "pds/cartesian.hpp"
 #include "pds/hyperloglog.hpp"
 
-#include <cat/show.hpp>
-#include <cat/bits/type.hpp>
+// #include <cat/show.hpp>
+// #include <cat/bits/type.hpp>
 
 #include <iostream>
 #include <random>
@@ -44,7 +44,7 @@ auto g = Group("Complete")
                                     return b > 500;
                                  });
 
-        std::cout << "idx: " << cat::show(idx) << std::endl;
+        // std::cout << "idx: " << cat::show(idx) << std::endl;
 
         auto r = pds::all_candidates(s, 
                                      std::make_tuple(pds::numeric_range<uint16_t>(0, 0xffff), 
@@ -89,7 +89,7 @@ auto g = Group("Complete")
                                     return b > 500;
                                  });
 
-        std::cout << "idx: " << cat::show(idx) << std::endl;
+        // std::cout << "idx: " << cat::show(idx) << std::endl;
         
         auto r = pds::all_candidates(s, 
                                      std::make_tuple(pds::numeric_range<uint16_t>(0, 0xffff), 
@@ -158,7 +158,7 @@ auto g = Group("Complete")
                                     return b.cardinality() > 10000;
                                  });
 
-        std::cout << "idx: " << cat::show(idx) << std::endl;
+        // std::cout << "idx: " << cat::show(idx) << std::endl;
         
         
         auto r = pds::all_candidates(s, 
