@@ -19,3 +19,4 @@ add_executable(test-pcap test/pcap.cpp)
 
 
 target_link_libraries(test-pcap -lpcap)
+target_link_libraries(test-loglog -lpcap)
