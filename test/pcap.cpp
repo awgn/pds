@@ -34,12 +34,12 @@ using loglog_t = pds::hyperloglog
       
 
 pds::sketch< loglog_t                      
-    , (1 << 16)
-    , pds::ModularHash<BIT_4(H1), BIT_4(H1), BIT_4(H1), BIT_4(H1)>   // IP components...
-    , pds::ModularHash<BIT_4(H2), BIT_4(H2), BIT_4(H2), BIT_4(H2)> 
-    , pds::ModularHash<BIT_4(H3), BIT_4(H3), BIT_4(H3), BIT_4(H3)> 
-    , pds::ModularHash<BIT_4(H4), BIT_4(H4), BIT_4(H4), BIT_4(H4)> 
-    , pds::ModularHash<BIT_4(H5), BIT_4(H5), BIT_4(H5), BIT_4(H5)> 
+    , (1 << 8)
+    , pds::ModularHash<BIT_4(H1), BIT_4(H1)>   // IP components...
+    , pds::ModularHash<BIT_4(H2), BIT_4(H2)> 
+    , pds::ModularHash<BIT_4(H3), BIT_4(H3)> 
+    , pds::ModularHash<BIT_4(H4), BIT_4(H4)> 
+    , pds::ModularHash<BIT_4(H5), BIT_4(H5)> 
     > test_sketch;
 
 
