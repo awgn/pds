@@ -34,12 +34,12 @@ using loglog_t = pds::hyperloglog
       
 
 pds::sketch< loglog_t                      
-    , (1 << 8)
-    , pds::ModularHash<BIT_4(H1), BIT_4(H1)>   // IP components...
-    , pds::ModularHash<BIT_4(H2), BIT_4(H2)> 
-    , pds::ModularHash<BIT_4(H3), BIT_4(H3)> 
-    , pds::ModularHash<BIT_4(H4), BIT_4(H4)> 
-    , pds::ModularHash<BIT_4(H5), BIT_4(H5)> 
+    , (1 << 16)
+    , pds::ModularHash<BIT_8(H1), BIT_8(H1)>   // IP components...
+    , pds::ModularHash<BIT_8(H2), BIT_8(H2)> 
+    , pds::ModularHash<BIT_8(H3), BIT_8(H3)> 
+    , pds::ModularHash<BIT_8(H4), BIT_8(H4)> 
+    , pds::ModularHash<BIT_8(H5), BIT_8(H5)> 
     > test_sketch;
 
 
@@ -100,8 +100,8 @@ auto g = Group("PCAP")
 
         char errbuf[PCAP_ERRBUF_SIZE];
 
-        if (argc < 2)
-            throw std::runtime_error("usage: pcap:FILE number_injected_flows:INT");
+        if (argc < 3)
+            throw std::runtime_error("usage: pcap:FILE number_injected_flows:INT threshold:INT");
 
         auto mem = test_sketch.size().first * test_sketch.size().second *  loglog_t{}.size();
         std::cout << "MEMORY: " << mem << " bytes (" << (static_cast<double>(mem)/ (1024*1024)) << " Mb)" << std::endl;
@@ -137,7 +137,9 @@ auto g = Group("PCAP")
         // get the index of the buckets whose value is greater than 1000...
         //
 
-        auto idx = test_sketch.index_buckets([](auto &b) { return b.cardinality() > 10000; });
+        auto thr = atoi(argv[2]);
+
+        auto idx = test_sketch.index_buckets([=](auto &b) { return b.cardinality() > thr; });
 
         std::cout << "+ reversing sketch..." << std::endl;
 
