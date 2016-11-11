@@ -122,6 +122,16 @@ auto h = Group("Hyper")
             std::cout << (n+1) << ": -> " << llc.cardinality() << std::endl;
         }
     })
+    .Single("counting", []
+    {
+        pds::hyperloglog<uint8_t, 1024, pds::universal<64, ((1ULL<<61)-1), 0>>  llc;
+
+        for(uint64_t n = 0; n < 100000; n++)
+        {
+            llc(n);
+            std::cout << (n+1) << ": -> " << llc.cardinality() << std::endl;
+        }
+    })
     ;
 
 
