@@ -75,7 +75,7 @@ namespace pds {
         constexpr static size_t L = hash_bitsize<Hash>::value;
 
         static_assert((M&(M-1)) == 0, "HLLC: groups (m) must be a power of two");
-        static_assert(L > K+3,        "HLLC: the hash_bitsize must be greater than K");
+        static_assert(L-K > 5,        "HLLC: the hash_bitsize must be reasonably greater than K (L-K > 5)");
 
         template <typename X = Hash>
         hyperloglog(X x = X())

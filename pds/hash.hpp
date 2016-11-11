@@ -174,10 +174,11 @@ namespace pds {
                       "universal: 'a' must be an odd integer");
 
         template <typename T>
-        size_t operator()(T x) const
+        size_t operator()(T x) const              
         {
             static_assert(b < (1ULL << (sizeof(T)*8 - M)) , "universal: 'b' must be less than 2^(bitsize(T)-M)");
-            return ((a*x+b) >> (sizeof(T)*8-M)) & ((1 << M)-1); 
+            size_t mask = (M >= sizeof(size_t)*8 ? (size_t)-1 : ((1ULL << M)-1));
+            return ((a*x+b) >> (sizeof(T)*8-M)) & mask; 
         }
     };
     
