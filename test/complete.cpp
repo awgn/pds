@@ -39,7 +39,7 @@ auto g = Group("Complete")
         // get the index of the buckets whose value is greater than 1000...
         //
 
-        auto idx = s.index_buckets([](auto &b)
+        auto idx = s.indexes([](auto &b)
                                  {
                                     return b > 500;
                                  });
@@ -84,7 +84,7 @@ auto g = Group("Complete")
         // get the index of the buckets whose value is greater than 1000...
         //
 
-        auto idx = s.index_buckets([](auto &b)
+        auto idx = s.indexes([](auto &b)
                                  {
                                     return b > 500;
                                  });
@@ -153,7 +153,7 @@ auto g = Group("Complete")
         // get the index of the buckets whose value is greater than 1000...
         //
 
-        auto idx = s.index_buckets([](auto &b)
+        auto idx = s.indexes([](auto &b)
                                  {
                                     return b.cardinality() > 10000;
                                  });
@@ -215,7 +215,7 @@ auto g = Group("Complete")
         // get the index of the buckets whose value is greater than 1000...
         //
 
-        auto idx = s.index_buckets([](auto &b)
+        auto idx = s.indexes([](auto &b)
                                  {
                                     return b.cardinality() > 10000;
                                  });
