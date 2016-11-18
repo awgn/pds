@@ -214,7 +214,7 @@ auto g = Group("Sketch")
         ips.increment_buckets(0xff114200);
         ips.increment_buckets(0xffffff00);
 
-        auto bs = ips.indexes([](uint32_t bucket) {
+        auto bs = ips.indexes([](uint32_t bucket, uint32_t) {
                                         return bucket != 0; 
                              });
 

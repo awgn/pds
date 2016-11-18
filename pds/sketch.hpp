@@ -29,6 +29,7 @@
 #include <pds/utility.hpp>
 #include <pds/tuple.hpp>
 #include <pds/hash.hpp>
+#include <pds/eval.hpp>
 
 #include <cstddef>
 #include <utility>
@@ -209,9 +210,11 @@ namespace pds {
         }
 
         //
-        // return the indexes of buckets whose value holds the given predicate 
+        // return the indexes of buckets whose value holds the given predicate. 
+        // to the predicate are passed the bucket and the sum of the values of all
+	// buckets in the same row. 
         //
-        
+ 
         template <typename Fun>
         auto indexes(Fun pred) const
         {
@@ -219,9 +222,12 @@ namespace pds {
 
             for(auto & v : data_) {
                 std::vector<size_t> row;
-                size_t c = 0;
+                size_t c = 0, sum = 0;
+		for(auto & e : v) 
+			sum += eval(e);
+
                 for(auto & e : v) {
-                    if (pred(e))
+                    if (pred(e, sum))
                         row.push_back(c);
                     c++;
                 }
@@ -230,7 +236,6 @@ namespace pds {
 
             return ret;
         }
-
         //
         // filter the keys whose the given predicate holds for each
         // bucket
