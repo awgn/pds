@@ -187,8 +187,27 @@ namespace pds {
             return ret;
         }
         
+	//
+        // given a matrix of indexes, return the corresponding buckets  
         //
-        // return the index of buckets whose value holds the given predicate 
+        
+        auto buckets(std::vector<std::vector<size_t>> idx) const
+        {
+            std::vector<T> ret;
+	    size_t n = 0;
+
+	    for(auto r : idx)
+	    {
+		for(auto i : r)
+		{
+		    ret.push_back(data_.at(n).at(i));
+		}
+		n++;
+	    }
+
+	    return ret;
+        }
+
         //
         // return the indexes of buckets whose value holds the given predicate 
         //
