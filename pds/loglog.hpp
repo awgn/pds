@@ -92,6 +92,11 @@ namespace pds {
             return alpha(M) * M * std::exp2(sum/M);
         }
 
+	double eval() const
+	{
+	    return this->cardinality();
+	}
+
         //
         // merge from another counter
         //

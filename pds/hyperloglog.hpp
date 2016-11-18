@@ -137,6 +137,11 @@ namespace pds {
             return e;
         }
 
+	double eval() const
+	{
+	    return this->cardinality();
+	}
+
         //
         // merge from another counter
         //
