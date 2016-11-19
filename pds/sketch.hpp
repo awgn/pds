@@ -38,7 +38,7 @@
 #include <tuple>
 #include <numeric>
 #include <algorithm>
-
+#include <limits>
 
 namespace pds {
 
@@ -85,7 +85,7 @@ namespace pds {
         //
         // foreach bucket... 
         //
-
+        
         template <typename Tp, typename Fun>
         void foreach_bucket(Tp const &elem, Fun action)
         {
@@ -214,6 +214,22 @@ namespace pds {
         // to the predicate are passed the bucket and the sum of the values of all
 	// buckets in the same row. 
         //
+
+	uint64_t minsum() const
+	{
+	    uint64_t sum = std::numeric_limits<uint64_t>::max(); 
+	    uint64_t row;
+            for(auto & r : data_) {
+		row = 0;
+		for(auto & e : r)  {
+			auto value = eval(e);
+			row += value;
+		}
+
+		sum = std::min(sum, row);
+	    }
+	    return sum;
+	}
  
         template <typename Fun>
         auto indexes(Fun pred) const
@@ -222,9 +238,7 @@ namespace pds {
 
             for(auto & v : data_) {
                 std::vector<size_t> row;
-                size_t c = 0, sum = 0;
-		for(auto & e : v) 
-			sum += eval(e);
+		size_t c = 0, sum = minsum(); 
 
                 for(auto & e : v) {
                     if (pred(e, sum))
@@ -316,6 +330,16 @@ namespace pds {
             for(auto & v : data_)
                 for(auto & e : v)
                     f(e);
+        }
+        
+        T & operator()(size_t r, size_t c)
+        {
+	    return data_.at(r).at(c); 
+        }
+
+        T const & operator()(size_t r, size_t c) const
+        {
+	    return data_.at(r).at(c); 
         }
 
         //
