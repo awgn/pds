@@ -16,6 +16,8 @@
 #include <unordered_map>
 #include <set>
 #include <algorithm>
+#include <tuple>
+
 #include <yats.hpp>
 
 #include <netinet/in.h>
@@ -35,32 +37,45 @@ using namespace pds;
 
 #define TEST_DEBUG_LOGLOG
 
+
+struct HashTriple
+{
+	uint32_t operator()(int );
+	uint32_t operator()(std::tuple<uint32_t, uint32_t, uint32_t> v) const
+	{
+		pds::Wang7 h;
+		return h(std::get<0>(v) ^ std::get<1>(v) ^ std::get<2>(v));
+	}
+
+};
+
+
 using loglog_t = pds::hyperloglog                                                                               
     <  uint8_t                               
-    ,  256 
-    ,  std::hash<std::tuple<uint32_t, uint32_t, uint32_t>>         
+    ,  64 
+    ,  HashTriple 
     >;                                                                                                                 
       
 
 pds::sketch< loglog_t                      
-    , (1 << 12)
-    , pds::ModularHash<BIT_6(H1), BIT_6(H1)>   // IP components...
-    , pds::ModularHash<BIT_6(H2), BIT_6(H2)> 
-    , pds::ModularHash<BIT_6(H3), BIT_6(H3)> 
-    , pds::ModularHash<BIT_6(H4), BIT_6(H4)> 
-    , pds::ModularHash<BIT_6(H5), BIT_6(H5)> 
+    , (1 << 16)
+    , pds::ModularHash<BIT_8(H1), BIT_8(H1)>   // IP components...
+    , pds::ModularHash<BIT_8(H2), BIT_8(H2)> 
+    , pds::ModularHash<BIT_8(H3), BIT_8(H3)> 
+    , pds::ModularHash<BIT_8(H4), BIT_8(H4)> 
+    , pds::ModularHash<BIT_8(H5), BIT_8(H5)> 
     > test_sketch;
 
 
 #ifdef TEST_DEBUG_LOGLOG
 
 pds::sketch< std::set<std::tuple<uint32_t, uint32_t, uint32_t>> 
-    , (1 << 12)
-    , pds::ModularHash<BIT_6(H1), BIT_6(H1)>   // IP components...
-    , pds::ModularHash<BIT_6(H2), BIT_6(H2)> 
-    , pds::ModularHash<BIT_6(H3), BIT_6(H3)> 
-    , pds::ModularHash<BIT_6(H4), BIT_6(H4)> 
-    , pds::ModularHash<BIT_6(H5), BIT_6(H5)> 
+    , (1 << 16)
+    , pds::ModularHash<BIT_8(H1), BIT_8(H1)>   // IP components...
+    , pds::ModularHash<BIT_8(H2), BIT_8(H2)> 
+    , pds::ModularHash<BIT_8(H3), BIT_8(H3)> 
+    , pds::ModularHash<BIT_8(H4), BIT_8(H4)> 
+    , pds::ModularHash<BIT_8(H5), BIT_8(H5)> 
     > test_sketch_set;
 
 #endif
@@ -91,15 +106,15 @@ packet_handler(u_char *, const struct pcap_pkthdr *h, const u_char *payload)
 	test_map[ip->daddr]
 		.insert(std::make_tuple(src_ip, src_port, dst_port));
 
-        test_sketch.foreach_bucket(ip2tuple<13>(ip->daddr), [&](auto &hllc) 
+        test_sketch.foreach_bucket(ip2tuple<8191>(ip->daddr), [&](auto &hllc) 
         {
-            hllc(std::make_tuple(pds::mangling<13>(src_ip), src_port, dst_port));
+            hllc(std::make_tuple(pds::mangling<8191>(src_ip), src_port, dst_port));
         });
 
 #ifdef TEST_DEBUG_LOGLOG
-        test_sketch_set.foreach_bucket(ip2tuple<13>(ip->daddr), [&](auto &hllc) 
+        test_sketch_set.foreach_bucket(ip2tuple<8191>(ip->daddr), [&](auto &hllc) 
         {
-            hllc.insert(std::make_tuple(pds::mangling<13>(src_ip), src_port, dst_port));
+            hllc.insert(std::make_tuple(pds::mangling<8191>(src_ip), src_port, dst_port));
         });
 #endif
 
@@ -119,15 +134,15 @@ packet_handler(u_char *, const struct pcap_pkthdr *h, const u_char *payload)
 	test_map[ip->daddr]
 		.insert(std::make_tuple(src_ip, src_port, dst_port));
 
-        test_sketch.foreach_bucket(ip2tuple<13>(ip->daddr), [&](auto &hllc) 
+        test_sketch.foreach_bucket(ip2tuple<8191>(ip->daddr), [&](auto &hllc) 
         {
-            hllc(std::make_tuple(pds::mangling<13>(src_ip), src_port, dst_port));
+            hllc(std::make_tuple(pds::mangling<8191>(src_ip), src_port, dst_port));
         });
        
 #ifdef TEST_DEBUG_LOGLOG 
-	test_sketch_set.foreach_bucket(ip2tuple<13>(ip->daddr), [&](auto &hllc) 
+	test_sketch_set.foreach_bucket(ip2tuple<8191>(ip->daddr), [&](auto &hllc) 
         {
-            hllc.insert(std::make_tuple(pds::mangling<13>(src_ip), src_port, dst_port));
+            hllc.insert(std::make_tuple(pds::mangling<8191>(src_ip), src_port, dst_port));
         });
 #endif
     } break;
@@ -169,7 +184,7 @@ auto g = Group("PCAP")
             auto src_port = rand();
             auto dst_port = rand();
 
-            test_sketch.foreach_bucket(ip2tuple<13>(dst_ip), [&](auto &hllc) 
+            test_sketch.foreach_bucket(ip2tuple<8191>(dst_ip), [&](auto &hllc) 
             {
                 hllc(std::make_tuple(src_ip, src_port, dst_port));
             });
@@ -230,7 +245,7 @@ auto g = Group("PCAP")
 #ifdef TEST_DEBUG_LOGLOG
 	// Sketch<std::set> 
 	{
-		auto idx = test_sketch_set.indexes([=](auto &b, auto sum) { 
+		auto idx = test_sketch_set.indexes([=](auto &b, auto) { 
 				bool ret = (100.0 * b.size() / minsum) >= perc;	
 				return ret;
 			   });
@@ -245,14 +260,14 @@ auto g = Group("PCAP")
 
 		for(auto & t: res) {
 
-		    auto it = test_map.find(tuple2ip<13>(t.value));
+		    auto it = test_map.find(tuple2ip<8191>(t.value));
 		    if (it != test_map.end()) { 
 
 			auto v = test_sketch_set.buckets(t.info);  
 			std::vector<size_t> buckets;
 			std::transform(v.begin(), v.end(), std::back_inserter(buckets), [](auto &b) { return b.size(); });
 
-			std::cout << "  candidate -> " << inet_ntoa({tuple2ip<13>(t.value)}) << " " << *std::min_element(buckets.begin(), buckets.end()) << std::endl;
+			std::cout << "  candidate -> " << inet_ntoa({tuple2ip<8191>(t.value)}) << " " << *std::min_element(buckets.begin(), buckets.end()) << std::endl;
 		    }
 		    else
 			false_positive++;
@@ -265,7 +280,7 @@ auto g = Group("PCAP")
 
 	// Sketch<HLL>
 	{
-		auto idx = test_sketch.indexes([=](auto &b, auto sum) { 
+		auto idx = test_sketch.indexes([=](auto &b, auto) { 
 				bool ret = (100.0 * b.cardinality() / minsum) >= perc;	
 				return ret;
 			   });
@@ -280,14 +295,14 @@ auto g = Group("PCAP")
 
 		for(auto & t: res) {
 
-		    auto it = test_map.find(tuple2ip<13>(t.value));
+		    auto it = test_map.find(tuple2ip<8191>(t.value));
 		    if (it != test_map.end()) { 
 
 			auto v = test_sketch.buckets(t.info);  
 			std::vector<size_t> buckets;
 			std::transform(v.begin(), v.end(), std::back_inserter(buckets), [](auto &b) { return b.cardinality(); });
 
-			std::cout << "  candidate (HLL) -> " << inet_ntoa({tuple2ip<13>(t.value)}) << " " << *std::min_element(buckets.begin(), buckets.end()) << std::endl;
+			std::cout << "  candidate (HLL) -> " << inet_ntoa({tuple2ip<8191>(t.value)}) << " " << *std::min_element(buckets.begin(), buckets.end()) << std::endl;
 		    }
 		    else
 			false_positive++;
