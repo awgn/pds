@@ -17,6 +17,7 @@
 #include <set>
 #include <algorithm>
 #include <tuple>
+#include <cmath>
 
 #include <yats.hpp>
 
@@ -155,6 +156,11 @@ auto g = Group("PCAP")
 
     .Main("flow-count",  [] (int argc, char *argv[]) {
 
+
+        std::map<uint32_t, uint32_t> top_hitter;
+        std::map<uint32_t, uint32_t> top_candidate;
+
+
         char errbuf[PCAP_ERRBUF_SIZE];
 
         if (argc < 3)
@@ -210,6 +216,7 @@ auto g = Group("PCAP")
 	    if (((100.0 * elem.second.size())/total) > perc) {
 		cnt++;
             	std::cout << "  hitter -> " << inet_ntoa({elem.first}) << " (" << elem.second.size() << ")" << std::endl;
+            	top_hitter[elem.first] = elem.second.size();
 	    }
 	}
 
@@ -267,7 +274,7 @@ auto g = Group("PCAP")
 			std::vector<size_t> buckets;
 			std::transform(v.begin(), v.end(), std::back_inserter(buckets), [](auto &b) { return b.size(); });
 
-			std::cout << "  candidate -> " << inet_ntoa({tuple2ip<8191>(t.value)}) << " " << *std::min_element(buckets.begin(), buckets.end()) << std::endl;
+			std::cout << "  candidate (SET) -> " << inet_ntoa({tuple2ip<8191>(t.value)}) << " " << *std::min_element(buckets.begin(), buckets.end()) << std::endl;
 		    }
 		    else
 			false_positive++;
@@ -303,6 +310,7 @@ auto g = Group("PCAP")
 			std::transform(v.begin(), v.end(), std::back_inserter(buckets), [](auto &b) { return b.cardinality(); });
 
 			std::cout << "  candidate (HLL) -> " << inet_ntoa({tuple2ip<8191>(t.value)}) << " " << *std::min_element(buckets.begin(), buckets.end()) << std::endl;
+            top_candidate[tuple2ip<8191>(t.value)] = *std::min_element(buckets.begin(), buckets.end());
 		    }
 		    else
 			false_positive++;
@@ -311,6 +319,28 @@ auto g = Group("PCAP")
 		std::cout << "Candidates found (" << (res.size() - false_positive) << " found in the map)!" << std::endl;
 		std::cout << "Reversing done in " << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << " usec" << std::endl;
 	}	
+
+
+    // err^2
+    //
+    //
+    long double err = 0;
+
+    for(auto hit : top_hitter)
+    {
+        auto cand = top_candidate.find(hit.first);
+        if ( cand == top_candidate.end())
+        {
+            std::cout << "could not find hitter " << inet_ntoa({hit.first}) << " among candidates..." << std::endl; 
+        }
+        else
+        {
+            err += std::pow(hit.second - cand->second, 2)*hit.second;
+        }
+    }
+
+    std::cout << "Err^2 = " << (err / total) << std::endl;
+
     })
     
     ;
