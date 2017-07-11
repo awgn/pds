@@ -1,5 +1,4 @@
 #include "pds/tuple.hpp"
-
 #include "pds/hash.hpp"
 #include "pds/range.hpp"
 #include "pds/sketch.hpp"
@@ -8,6 +7,7 @@
 #include "pds/mangling.hpp"
 #include "pds/hyperloglog.hpp"
 #include "pds/loglog.hpp"
+#include "pds/stat.hpp"
 
 #include <pcap/pcap.h>
 
@@ -36,9 +36,6 @@ using namespace yats;
 using namespace pds;
 
 
-#define TEST_DEBUG_LOGLOG
-
-
 struct HashTriple
 {
 	uint32_t operator()(int );
@@ -59,29 +56,26 @@ using loglog_t = pds::hyperloglog
       
 
 pds::sketch< loglog_t                      
-    , (1 << 16)
-    , pds::ModularHash<BIT_8(H1), BIT_8(H1)>   // IP components...
-    , pds::ModularHash<BIT_8(H2), BIT_8(H2)> 
-    , pds::ModularHash<BIT_8(H3), BIT_8(H3)> 
-    , pds::ModularHash<BIT_8(H4), BIT_8(H4)> 
-    , pds::ModularHash<BIT_8(H5), BIT_8(H5)> 
-    > test_sketch;
+    , (1 << 14)
+    , pds::ModularHash<BIT_7(H1), BIT_7(H1)>   // IP components...
+    , pds::ModularHash<BIT_7(H2), BIT_7(H2)> 
+    , pds::ModularHash<BIT_7(H3), BIT_7(H3)> 
+    , pds::ModularHash<BIT_7(H4), BIT_7(H4)> 
+    , pds::ModularHash<BIT_7(H5), BIT_7(H5)> 
+    > llc_sketch;
 
 
-#ifdef TEST_DEBUG_LOGLOG
+pds::sketch< std::set<std::tuple<uint32_t, uint16_t, uint16_t>>
+    , (1 << 14)
+    , pds::ModularHash<BIT_7(H1), BIT_7(H1)>   // IP components...
+    , pds::ModularHash<BIT_7(H2), BIT_7(H2)> 
+    , pds::ModularHash<BIT_7(H3), BIT_7(H3)> 
+    , pds::ModularHash<BIT_7(H4), BIT_7(H4)> 
+    , pds::ModularHash<BIT_7(H5), BIT_7(H5)> 
+    > shadow_sketch;
 
-pds::sketch< std::set<std::tuple<uint32_t, uint32_t, uint32_t>> 
-    , (1 << 16)
-    , pds::ModularHash<BIT_8(H1), BIT_8(H1)>   // IP components...
-    , pds::ModularHash<BIT_8(H2), BIT_8(H2)> 
-    , pds::ModularHash<BIT_8(H3), BIT_8(H3)> 
-    , pds::ModularHash<BIT_8(H4), BIT_8(H4)> 
-    , pds::ModularHash<BIT_8(H5), BIT_8(H5)> 
-    > test_sketch_set;
 
-#endif
-
-std::unordered_map<uint32_t, std::set<std::tuple<uint32_t, uint32_t, uint32_t> > > test_map;
+std::unordered_map<uint32_t, std::set<std::tuple<uint32_t, uint32_t, uint32_t> > > actual_map;
 
 
 void
@@ -104,20 +98,18 @@ packet_handler(u_char *, const struct pcap_pkthdr *h, const u_char *payload)
         auto src_port = ntohs(tcp->source);
         auto dst_port = ntohs(tcp->dest);
 
-	test_map[ip->daddr]
+	actual_map[ip->daddr]
 		.insert(std::make_tuple(src_ip, src_port, dst_port));
 
-        test_sketch.foreach_bucket(ip2tuple<8191>(ip->daddr), [&](auto &hllc) 
+        llc_sketch.foreach_bucket(ip2tuple<8191>(ip->daddr), [&](auto &hllc) 
         {
             hllc(std::make_tuple(pds::mangling<8191>(src_ip), src_port, dst_port));
         });
 
-#ifdef TEST_DEBUG_LOGLOG
-        test_sketch_set.foreach_bucket(ip2tuple<8191>(ip->daddr), [&](auto &hllc) 
+        shadow_sketch.foreach_bucket(ip2tuple<8191>(ip->daddr), [&](auto &s) 
         {
-            hllc.insert(std::make_tuple(pds::mangling<8191>(src_ip), src_port, dst_port));
+            s.insert(std::make_tuple(pds::mangling<8191>(src_ip), src_port, dst_port));
         });
-#endif
 
     } break;
 
@@ -132,20 +124,19 @@ packet_handler(u_char *, const struct pcap_pkthdr *h, const u_char *payload)
         auto src_port = ntohs(udp->source);
         auto dst_port = ntohs(udp->dest);
 
-	test_map[ip->daddr]
+	actual_map[ip->daddr]
 		.insert(std::make_tuple(src_ip, src_port, dst_port));
 
-        test_sketch.foreach_bucket(ip2tuple<8191>(ip->daddr), [&](auto &hllc) 
+        llc_sketch.foreach_bucket(ip2tuple<8191>(ip->daddr), [&](auto &hllc) 
         {
             hllc(std::make_tuple(pds::mangling<8191>(src_ip), src_port, dst_port));
         });
        
-#ifdef TEST_DEBUG_LOGLOG 
-	test_sketch_set.foreach_bucket(ip2tuple<8191>(ip->daddr), [&](auto &hllc) 
+        shadow_sketch.foreach_bucket(ip2tuple<8191>(ip->daddr), [&](auto &s) 
         {
-            hllc.insert(std::make_tuple(pds::mangling<8191>(src_ip), src_port, dst_port));
+            s.insert(std::make_tuple(pds::mangling<8191>(src_ip), src_port, dst_port));
         });
-#endif
+
     } break;
 
     }
@@ -156,18 +147,15 @@ auto g = Group("PCAP")
 
     .Main("flow-count",  [] (int argc, char *argv[]) {
 
-
-        std::map<uint32_t, uint32_t> top_hitter;
-        std::map<uint32_t, uint32_t> top_candidate;
-
+        std::map<uint32_t, int64_t> top_hitter;
+        std::map<uint32_t, int64_t> top_candidate;
 
         char errbuf[PCAP_ERRBUF_SIZE];
 
         if (argc < 3)
             throw std::runtime_error("usage: pcap:FILE number_injected_flows:INT perc:DOUBLE");
 
-        auto mem = test_sketch.size().first * test_sketch.size().second * loglog_t{}.size();
-        std::cout << "MEMORY: " << mem << " bytes (" << (static_cast<double>(mem)/ (1024*1024)) << " Mb)" << std::endl;
+        auto mem = llc_sketch.size().first * llc_sketch.size().second * loglog_t{}.size();
 
         std::cout << "+ loading sketch..." << std::endl;
 
@@ -190,20 +178,31 @@ auto g = Group("PCAP")
             auto src_port = rand();
             auto dst_port = rand();
 
-            test_sketch.foreach_bucket(ip2tuple<8191>(dst_ip), [&](auto &hllc) 
+            llc_sketch.foreach_bucket(ip2tuple<8191>(dst_ip), [&](auto &hllc) 
             {
                 hllc(std::make_tuple(src_ip, src_port, dst_port));
             });
+            
+	    shadow_sketch.foreach_bucket(ip2tuple<8191>(dst_ip), [&](auto &s) 
+            {
+		s.insert(std::make_tuple(src_ip, src_port, dst_port));
+            });
+
+	    // insert fake hitter in the deterministic map 
+	    //
+   	    
+	    actual_map[dst_ip]
+		.insert(std::make_tuple(src_ip, src_port, dst_port));
         }
 
         auto perc = atof(argv[2]);
 	
 	//
-	// get real number of hitter...
+	// get real number of flow...
 	//
 	
 	size_t total = 0, cnt = 0;
-	for(auto &elem : test_map)
+	for(auto &elem : actual_map)
 	{
 	    total+= elem.second.size();
 	}
@@ -211,11 +210,12 @@ auto g = Group("PCAP")
 	std::cout << std::endl;
 	std::cout << "Total Map/Flow size: " << total << std::endl;
 
-	for(auto &elem : test_map)
+	for(auto &elem : actual_map)
 	{
 	    if (((100.0 * elem.second.size())/total) > perc) {
 		cnt++;
-            	std::cout << "  hitter -> " << inet_ntoa({elem.first}) << " (" << elem.second.size() << ")" << std::endl;
+		if (perc > 0)
+            		std::cout << "  hitter -> " << inet_ntoa({elem.first}) << " (" << elem.second.size() << ")" << std::endl;
             	top_hitter[elem.first] = elem.second.size();
 	    }
 	}
@@ -227,67 +227,15 @@ auto g = Group("PCAP")
 	//	
 
 	// dump buckets...
-#ifdef TEST_DEBUG_LOGLOG
-#if 0
-	auto colum = test_sketch.size().second;
-	for(size_t x = 0; x < colum; x++) {
-		auto exact = eval(test_sketch_set(0, x));
-		auto estimate = eval(test_sketch(0, x));
-		std::cout << estimate << " " << exact << " "  << "\terror:" << (double)(exact-estimate)/exact << std::endl;
-	}
-#endif
-#endif
 
-	auto minsum = test_sketch.minsum();
-#ifdef TEST_DEBUG_LOGLOG
-	auto real   = test_sketch_set.minsum();
-#endif
+	auto minsum = llc_sketch.minsum();
 	std::cout << "Total minsum: " << minsum;
 
-#ifdef TEST_DEBUG_LOGLOG
-	std::cout  << " realsum: " << real;
-#endif
 	std::cout  << std::endl;
-
-#ifdef TEST_DEBUG_LOGLOG
-	// Sketch<std::set> 
-	{
-		auto idx = test_sketch_set.indexes([=](auto &b, auto) { 
-				bool ret = (100.0 * b.size() / minsum) >= perc;	
-				return ret;
-			   });
-
-		std::cout << "+ reversing sketch<std::set>..." << std::endl;
-
-		auto start = std::chrono::system_clock::now();
-		auto res = pds::reverse_sketch<uint16_t, uint16_t>(test_sketch_set, idx); 
-		auto end = std::chrono::system_clock::now();
-
-		size_t false_positive = 0;
-
-		for(auto & t: res) {
-
-		    auto it = test_map.find(tuple2ip<8191>(t.value));
-		    if (it != test_map.end()) { 
-
-			auto v = test_sketch_set.buckets(t.info);  
-			std::vector<size_t> buckets;
-			std::transform(v.begin(), v.end(), std::back_inserter(buckets), [](auto &b) { return b.size(); });
-
-			std::cout << "  candidate (SET) -> " << inet_ntoa({tuple2ip<8191>(t.value)}) << " " << *std::min_element(buckets.begin(), buckets.end()) << std::endl;
-		    }
-		    else
-			false_positive++;
-		}
-		
-		std::cout << "Candidates found (" << (res.size() - false_positive) << " found in the map)!" << std::endl;
-		std::cout << "Reversing done in " << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << " usec" << std::endl;
-	}	
-#endif
 
 	// Sketch<HLL>
 	{
-		auto idx = test_sketch.indexes([=](auto &b, auto) { 
+		auto idx = llc_sketch.indexes([=](auto &b, auto) { 
 				bool ret = (100.0 * b.cardinality() / minsum) >= perc;	
 				return ret;
 			   });
@@ -295,22 +243,22 @@ auto g = Group("PCAP")
 		std::cout << "+ reversing sketch<HLL>..." << std::endl;
 
 		auto start = std::chrono::system_clock::now();
-		auto res = pds::reverse_sketch<uint16_t, uint16_t>(test_sketch, idx); 
+		auto res = pds::reverse_sketch<uint16_t, uint16_t>(llc_sketch, idx); 
 		auto end = std::chrono::system_clock::now();
 
 		size_t false_positive = 0;
 
 		for(auto & t: res) {
 
-		    auto it = test_map.find(tuple2ip<8191>(t.value));
-		    if (it != test_map.end()) { 
+		    auto it = actual_map.find(tuple2ip<8191>(t.value));
+		    if (it != actual_map.end()) { 
 
-			auto v = test_sketch.buckets(t.info);  
+			auto v = llc_sketch.buckets(t.info);  
 			std::vector<size_t> buckets;
 			std::transform(v.begin(), v.end(), std::back_inserter(buckets), [](auto &b) { return b.cardinality(); });
 
 			std::cout << "  candidate (HLL) -> " << inet_ntoa({tuple2ip<8191>(t.value)}) << " " << *std::min_element(buckets.begin(), buckets.end()) << std::endl;
-            top_candidate[tuple2ip<8191>(t.value)] = *std::min_element(buckets.begin(), buckets.end());
+            		top_candidate[tuple2ip<8191>(t.value)] = *std::min_element(buckets.begin(), buckets.end());
 		    }
 		    else
 			false_positive++;
@@ -320,11 +268,11 @@ auto g = Group("PCAP")
 		std::cout << "Reversing done in " << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << " usec" << std::endl;
 	}	
 
-
-    // err^2
-    //
-    //
-    long double err = 0;
+    stat::MAD mad_hitter; 
+    stat::MSE mse_hitter; 
+    stat::MAPE mape_hitter; 
+    
+    stat::NRMSD nrmsd_hitter; 
 
     for(auto hit : top_hitter)
     {
@@ -335,15 +283,59 @@ auto g = Group("PCAP")
         }
         else
         {
-            err += std::pow(hit.second - cand->second, 2)*hit.second;
+	    if (perc > 0)
+	    	std::cout << "hitter: " << inet_ntoa({hit.first}) << " \t-> occur " << hit.second << " - estimated " << cand->second << std::endl;
+
+	    mad_hitter(cand->second, hit.second);
+	    mse_hitter(cand->second, hit.second);
+	    mape_hitter(cand->second, hit.second);
+	    nrmsd_hitter(cand->second, hit.second);
         }
     }
 
-    std::cout << "Err^2 = " << (err / total) << std::endl;
+    std::cout << "Stats:"   << std::endl; 
+    std::cout << "MAD  => " << mad_hitter.value() << std::endl; 
+    std::cout << "MSE  => " << mse_hitter.value() << std::endl; 
+    std::cout << "MAPE => " << mape_hitter.value() << std::endl; 
+    std::cout << "NRMSD=> " << nrmsd_hitter.value() << std::endl; 
 
-    })
-    
-    ;
+    std::vector<size_t> llc_counters, shadow_counters;
+
+    llc_sketch.forall([&](auto &hllc) {
+	llc_counters.push_back(hllc.eval());
+    });
+
+    shadow_sketch.forall([&](auto &s) {
+	shadow_counters.push_back(s.size());
+    });
+
+    stat::NRMSD nrmsd_hllc;
+ 
+    for(auto l = 0; l < llc_counters.size(); ++l)
+    {
+	if (llc_counters[l])
+	{
+		// std::cout << llc_counters[l] << " " << shadow_counters[l] << std::endl;
+		nrmsd_hllc(llc_counters[l], shadow_counters[l]);
+	}
+    } 
+   
+    std::cout << "NRMSD (HLL) => " << nrmsd_hllc.value() << std::endl; 
+
+    size_t map_bytes = 0;
+
+    for(auto &elem : actual_map)
+    {
+     	map_bytes += sizeof(elem.first) + sizeof(elem.second) + sizeof(decltype(*std::begin(elem.second))) * elem.second.size();
+    }
+ 
+    std::cout << "\nMEMORY: " << mem << " bytes (" << (static_cast<double>(mem)/ (1024*1024)) << " MB)" << std::endl;
+    std::cout << "DETERMINISTIC MEMORY: " << map_bytes << " bytes (" << (static_cast<double>(map_bytes)/ (1024*1024)) << " MB)" << std::endl;
+    std::cout << "Commpression factor: " << (static_cast<double>(map_bytes)/mem) << std::endl;
+
+
+});
+
 
 
 int
